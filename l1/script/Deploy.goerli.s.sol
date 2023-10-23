@@ -12,10 +12,10 @@ contract DeployScript is Script {
     function setUp() public {
         uint256 deployerPk = vm.envUint("DEPLOYER_PK");
         vm.startBroadcast(deployerPk);
-        MarquisMsgAdapter marquisMsgAdapter = new MarquisMsgAdapter(
-            STARKNET_CORE_GOERLI,
-            L2_MSG_ADAPTER
-        );
+        // MarquisMsgAdapter marquisMsgAdapter = new MarquisMsgAdapter(
+        //     STARKNET_CORE_GOERLI,
+        //     L2_MSG_ADAPTER
+        // );
         vm.stopBroadcast();
     }
 

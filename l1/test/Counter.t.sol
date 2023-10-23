@@ -4,22 +4,8 @@ pragma solidity ^0.8.13;
 import {Test, console} from "forge-std/Test.sol";
 import {Counter} from "../src/Counter.sol";
 
-contract VulnerableContract {
-    function getSum(uint256[] memory numbers) external view returns (uint256) {
-        uint256 sum;
-        for (uint256 i = 0; i < numbers.length; ) {
-            unchecked {
-                sum += numbers[i];
-                ++i;
-            }
-        }
-        return sum;
-    }
-}
-
 contract CounterTest is Test {
     Counter public counter;
-    VulnerableContract public vulnerableContract;
 
     function setUp() public {
         counter = new Counter();
@@ -51,14 +37,5 @@ contract CounterTest is Test {
             bytes4(keccak256("testGetSelector()")) ==
                 this.testGetSelector.selector
         );
-    }
-
-    function testVulnerableContract() public {
-        uint256[] memory numbers = new uint256[](2);
-        numbers[0] = type(uint256).max;
-        numbers[1] = 1;
-        vulnerableContract = new VulnerableContract();
-        uint256 sum = vulnerableContract.getSum(numbers);
-        console.log(sum);
     }
 }
