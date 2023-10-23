@@ -60,8 +60,14 @@ mod marquis_msg_adapter {
     ///
     /// In this example, the payload is expected to be a single felt value. But it can be any
     /// deserializable struct written in cairo.
+
+    // TODO: add a variable that is l1_Msg_Adapter_address, with the corresponding SETTER AND GETTER
     #[l1_handler]
     fn l1_deposit_handler(ref self: ContractState, from_address: felt252, value: felt252) {
+
+        // TODO: 
+        // Check if the `from_address` is same as the L1 contract address
+        // Mint 
     }
 
     /// Handles a message received from L1.

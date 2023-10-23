@@ -1,18 +1,25 @@
 pragma solidity ^0.8.18;
 
 import {IStarknetMessaging} from "./interfaces/IStarknetMessaging.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract MarquisMsgAdapter {
-    IStarknetMessaging public starknetMessaging;
+/**
+ * @title MarquisMsgAdapter
+ * @author Carlos Ramos
+ * @dev this contract will interact with starknet core contract to send and consume messages to / from l2
+ */
 
+contract MarquisMsgAdapter is Initializable, OwnableUpgradeable {
     uint256 constant DEPOSIT_SELECTOR_L2 =
-        0x002ec0df5118cf86d0032373d25506cff9e952ef881e2d6729f57356c766120e;
-
+        0x002ec0df5118cf86d0032373d25506cff9e952ef881e2d6729f57356c766120e; // keccak256("l1_deposit_handler")
+    IStarknetMessaging public starknetMessaging;
     address l2MsgAdapterAddr;
 
-    constructor(address _starknetMessagingAddr, address _l2MsgAdapterAddr) {
+    function initialize(
+        address _starknetMessagingAddr,
+        address _l2MsgAdapterAddr
+    ) external {
         starknetMessaging = IStarknetMessaging(_starknetMessagingAddr);
-        l2MsgAdapterAddr = _l2MsgAdapterAddr;
     }
 
     function sendManyValues(
