@@ -10,10 +10,7 @@ contract TestFeltLibrary is Test {
         uint256 value = 0x1234567890123456789012345678901234567890123456789012345678901234;
         (Felt _amount_high, Felt _amount_low) = value.to2Felt();
         require(Felt.unwrap(_amount_high) == 0x1);
-        require(
-            Felt.unwrap(_amount_low) ==
-                0x234567890123456789012345678901234567890123456789012345678901234
-        );
+        require(Felt.unwrap(_amount_low) == 0x234567890123456789012345678901234567890123456789012345678901234);
 
         value = 0x2;
         (_amount_high, _amount_low) = value.to2Felt();

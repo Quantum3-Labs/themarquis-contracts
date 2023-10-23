@@ -27,15 +27,11 @@ contract CounterTest is Test {
     //  fn msg_handler_value(ref self: ContractState, from_address: felt252, value: felt252)
     function testGetSelector() public {
         console.logBytes32(
-            bytes32(
-                0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-            ) & keccak256("l1_deposit_handler")
+            bytes32(0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
+                & keccak256("l1_deposit_handler")
         );
         // console.logUint(uint256(keccak256("function_name")) & (1 << 252));
         //soldity
-        require(
-            bytes4(keccak256("testGetSelector()")) ==
-                this.testGetSelector.selector
-        );
+        require(bytes4(keccak256("testGetSelector()")) == this.testGetSelector.selector);
     }
 }
