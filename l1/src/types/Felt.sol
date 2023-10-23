@@ -8,4 +8,8 @@ library FeltLibrary {
     function to2Felt(uint256 value) internal pure returns (Felt, Felt) {
         return (Felt.wrap(value >> 252), Felt.wrap(value & (((1 << 252)) - 1)));
     }
+
+    function toUint256(Felt high, Felt low) internal pure returns (uint256) {
+        return (Felt.unwrap(high) << 252) | Felt.unwrap(low);
+    }
 }
