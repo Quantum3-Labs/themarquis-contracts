@@ -9,6 +9,13 @@ enum Direction {
     Down: (),
 }
 
+#[derive(Serde, Drop, Copy, PartialEq, Introspect)]
+enum Color {
+    Red: (),
+    Black: (),
+    None: (),
+}
+
 impl DirectionIntoFelt252 of Into<Direction, felt252> {
     fn into(self: Direction) -> felt252 {
         match self {
@@ -22,10 +29,17 @@ impl DirectionIntoFelt252 of Into<Direction, felt252> {
 }
 
 #[derive(Model, Drop, Serde)]
+struct Square {
+    #[key]
+    game_id: felt252,
+    vec: Vec2,
+    piece: PieceType,
+}
+#[derive(Model, Drop, Serde)]
 struct Moves {
     #[key]
     player: ContractAddress,
-    remaining: u8,
+    //remaining: u8,
     last_direction: Direction
 }
 
@@ -39,6 +53,7 @@ struct Vec2 {
 struct Position {
     #[key]
     player: ContractAddress,
+    number: u8,
     vec: Vec2,
 }
 
