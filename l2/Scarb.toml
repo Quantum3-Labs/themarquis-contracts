@@ -1,6 +1,6 @@
 [package]
 name = "l2"
-version = "1.0.0"
+version = "0.0.1"
 cairo-version = "2.2.0"
 
 [cairo]
