@@ -28,13 +28,13 @@ impl DirectionIntoFelt252 of Into<Direction, felt252> {
     }
 }
 
-#[derive(Model, Drop, Serde)]
-struct Square {
-    #[key]
-    game_id: felt252,
-    vec: Vec2,
-    piece: PieceType,
-}
+// #[derive(Model, Drop, Serde)]
+// struct Square {
+//     #[key]
+//     game_id: felt252,
+//     vec: Vec2,
+//     piece: PieceType,
+// }
 #[derive(Model, Drop, Serde)]
 struct Moves {
     #[key]
