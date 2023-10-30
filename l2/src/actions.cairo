@@ -6,7 +6,7 @@ use l2::models::{Choice};
 trait IActions<TContractState> {
     fn spawn(self: @TContractState, player_address: ContractAddress) -> u32;
     fn move(self: @TContractState, game_id: u32, choice: Choice, amount: u8);
-    fn reveal_winner(self: @TContractState, game_id: u32);
+    fn set_winner(self: @TContractState, game_id: u32, vrf: u8);
 }
 
 // dojo decorator
@@ -14,7 +14,7 @@ trait IActions<TContractState> {
 mod actions {
     use starknet::{ContractAddress, get_caller_address};
     use l2::models::{Game, GameTurn,Choice};
-    use l2::utils::betting;
+    use l2::utils::{betting, seed, random};
     use super::IActions;
 
     // declaring custom event struct
@@ -83,29 +83,28 @@ mod actions {
             emit!(world, Moved { game_id, player, amount });
         }
 
-        fn reveal_winner(self: @ContractState, game_id: u32) {
+        fn set_winner(self: @ContractState, game_id: u32, vrf: u8) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
             // Retrieve current game and game_turn data from the world.
             let (mut game, game_turn) = get!(world, game_id, (Game, GameTurn));
 
-            // FIXME: Retrieve vrf value 
-            let vrf = Choice::OneRed(());
+            let vrf: felt252 = vrf.into();
 
-            if vrf == game_turn.choice {
+            if vrf == game_turn.choice.into() {
                 game.winner = game_turn.player;
-            } else {
-                game.winner = starknet::contract_address_const::<0x00>();
+                // Update the world state with the new moves data and position.
+                set!(world, (game, game_turn));
             }
-            // Update the world state with the new moves data and position.
-            set!(world, (game, game_turn));
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+        use debug::PrintTrait;
+
     use starknet::{class_hash::Felt252TryIntoClassHash,contract_address_const};
 
     // import world dispatcher
@@ -120,6 +119,9 @@ mod tests {
 
     // import actions
     use super::{actions, IActionsDispatcher, IActionsDispatcherTrait};
+
+    use l2::utils::{seed, random};
+
 
     // reusable function for tests
     fn setup_world() -> (IWorldDispatcher, IActionsDispatcher) {
@@ -166,7 +168,7 @@ mod tests {
         let game_id = actions_system.spawn(caller);
         let amount = 10;
         let choice = Choice::OneRed(());
-        actions_system.move(game_id, Choice::OneRed(()), amount);
+        actions_system.move(game_id, choice, amount);
 
         // call move with OneRed choice
         let game_turn = get!(world, game_id, (GameTurn));
@@ -183,7 +185,7 @@ mod tests {
 
      #[test]
     #[available_gas(30000000)]
-    fn test_reveal_winner() {
+    fn test_fixed_winner() {
         // caller
         let caller = starknet::contract_address_const::<0x1>();
 
@@ -191,14 +193,44 @@ mod tests {
 
         // call spawn()
         let game_id = actions_system.spawn(caller);
-        let amount = 10;
-        let choice = Choice::OneRed(());
-        actions_system.move(game_id, Choice::OneRed(()), amount);
-        actions_system.reveal_winner(game_id);
+        let amount = 20;
+        let choice = Choice::TwoBlack(());
+        actions_system.move(game_id, choice, amount);
+
+        let fixed_number_winner = 2;
+
+        actions_system.set_winner(game_id, fixed_number_winner);
 
         let game = get!(world, game_id, (Game));
-        assert(game.winner == caller, 'winner is wrong');
+        assert(game.winner == starknet::contract_address_const::<0x1>(), 'winner is not player');
 
         
-     }
+    }
+
+     #[test]
+    #[available_gas(30000000)]
+    fn test_random() {
+        // caller
+        let caller = starknet::contract_address_const::<0x1>();
+
+        let (world, actions_system) = setup_world();
+
+        // call spawn()
+        let game_id = actions_system.spawn(caller);
+        let amount = 30;
+        let choice = Choice::ThreeRed(()); 
+        actions_system.move(game_id, choice, amount);
+        
+        // dummy vrf, FIXME
+        let vrf = random(pedersen::pedersen(seed(), choice.into()), 6);
+        vrf.print(); // Beacuse of seed(), this vrf value is 3, thats is mapped into Choice::ThreeRed(())
+
+        actions_system.set_winner(game_id, vrf);
+
+        let (game, game_turn) = get!(world, game_id, (Game, GameTurn));
+        assert(game_turn.choice != Choice::None(()), 'Choice still empty');
+        game.winner.print();  // Because of seed (), player wins
+
+        
+    }
 }
