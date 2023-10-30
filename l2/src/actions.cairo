@@ -4,8 +4,8 @@ use l2::models::{Choice};
 // define the interface
 #[starknet::interface]
 trait IActions<TContractState> {
-    fn spawn(self: @TContractState, player_address: ContractAddress);
-    fn move(self: @TContractState, choice: Choice, amount: u8);
+    fn spawn(self: @TContractState, player_address: ContractAddress) -> u32;
+    fn move(self: @TContractState, game_id: u32, choice: Choice, amount: u8);
 }
 
 // dojo decorator
@@ -26,6 +26,7 @@ mod actions {
     // declaring custom event struct
     #[derive(Drop, starknet::Event)]
     struct Moved {
+        game_id: u32,
         player: ContractAddress,
         amount: u8
     }
@@ -34,11 +35,10 @@ mod actions {
     #[external(v0)]
     impl ActionsImpl of IActions<ContractState> {
         // ContractState is defined by system decorator expansion
-        fn spawn(self: @ContractState, player_address: ContractAddress) {
+        fn spawn(self: @ContractState, player_address: ContractAddress) -> u32{
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
-            // Use fixed game_id for now. fixme call uuid()
-            let game_id = 100;
+            let game_id = world.uuid();
             // house address = 0x00
             let winner = starknet::contract_address_const::<0x00>();
 
@@ -56,10 +56,11 @@ mod actions {
                     }
                 )
             );
+            game_id
         }
 
         // Implementation of the move function for the ContractState struct.
-        fn move(self: @ContractState, choice: Choice, amount: u8) {
+        fn move(self: @ContractState, game_id: u32, choice: Choice, amount: u8) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
@@ -67,7 +68,7 @@ mod actions {
             let player = get_caller_address();
 
             // Retrieve current game and game_turn data from the world.
-            let (game, mut game_turn) = get!(world, 100, (Game, GameTurn));
+            let (game, mut game_turn) = get!(world, game_id, (Game, GameTurn));
 
             // player's move.
             //let game_turn = betting(game_turn, choice, amount);
@@ -78,7 +79,7 @@ mod actions {
             set!(world, (game, game_turn));
 
             // Emit an event to the world to notify about the player's move.
-            emit!(world, Moved { player, amount });
+            emit!(world, Moved { game_id, player, amount });
         }
     }
 }
@@ -122,8 +123,7 @@ mod tests {
         let (world, actions_system) = setup_world();
 
         // call spawn()
-        actions_system.spawn(caller);
-        let game_id = 100;
+        let game_id = actions_system.spawn(caller);
         let game = get!(world, game_id, (Game));
         assert(game.winner == contract_address_const::<0x0>(), 'winner is wrong');
         assert(game.player == contract_address_const::<0x1>(), 'player is wrong');
@@ -143,11 +143,10 @@ mod tests {
         let (world, actions_system) = setup_world();
 
         // call spawn()
-        actions_system.spawn(caller);
-        let game_id = 100;
+        let game_id = actions_system.spawn(caller);
         let amount = 10;
         let choice = Choice::OneRed(());
-        actions_system.move(Choice::OneRed(()), amount);
+        actions_system.move(game_id, Choice::OneRed(()), amount);
 
         // call move with OneRed choice
         let game_turn = get!(world, game_id, (GameTurn));
@@ -156,7 +155,7 @@ mod tests {
         let one_red_felt: felt252 = choice.into();
 
         // check moves
-        assert(game_turn.amount == 10, 'amount is wrong');
+        assert(game_turn.amount == amount, 'amount is wrong');
 
         // check choice
         assert(game_turn.choice.into() == one_red_felt, 'choice is wrong');
