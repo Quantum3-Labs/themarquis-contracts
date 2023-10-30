@@ -67,12 +67,12 @@ mod actions {
             let player = get_caller_address();
 
             // Retrieve current game and game_turn data from the world.
-            let (game, mut game_turn) = get!(world, player, (Game, GameTurn));
+            let (game, mut game_turn) = get!(world, 100, (Game, GameTurn));
 
             // player's move.
             //let game_turn = betting(game_turn, choice, amount);
-            // game_turn.choice = choice;
-            // game_turn.amount = 10;
+             game_turn.choice = choice;
+             game_turn.amount = amount;
 
             // Update the world state with the new moves data and position.
             set!(world, (game, game_turn));
@@ -134,48 +134,31 @@ mod tests {
         assert(game_turn.choice == Choice::None(()), 'choice is wrong');
         assert(game_turn.amount == 0, 'amount is wrong');
     }
-    // fn test_move() {
-    //     // caller
-    //     let caller = starknet::contract_address_const::<0x1>();
+    #[test]
+    #[available_gas(30000000)]
+    fn test_move() {
+        // caller
+        let caller = starknet::contract_address_const::<0x1>();
 
-    //     // models
-    //     let mut models = array![game::TEST_CLASS_HASH, game_turn::TEST_CLASS_HASH];
+        let (world, actions_system) = setup_world();
 
-    //     // deploy world with models
-    //     let world = spawn_test_world(models);
+        // call spawn()
+        actions_system.spawn(caller);
+        let game_id = 100;
+        let amount = 10;
+        let choice = Choice::OneRed(());
+        actions_system.move(Choice::OneRed(()), amount);
 
-    //     // deploy systems contract
-    //     let contract_address = world
-    //         .deploy_contract('salt', actions::TEST_CLASS_HASH.try_into().unwrap());
-    //     let actions_system = IActionsDispatcher { contract_address };
+        // call move with OneRed choice
+        let game_turn = get!(world, game_id, (GameTurn));
 
-    //     // call spawn()
-    //     actions_system.spawn(caller);
+        // casting OneRed choice
+        let one_red_felt: felt252 = choice.into();
 
-    //     // // call move with OneRed choice
-    //     let amount = 10;
-    //     let choice = Choice::OneRed(());
-    //     actions_system.move(Choice::OneRed(()), amount);
+        // check moves
+        assert(game_turn.amount == 10, 'amount is wrong');
 
-    //     // Check world state
-    //     let game_turn = get!(world, caller, (GameTurn));
-
-    //     // casting OneRed choice
-    //     let one_red_felt: felt252 = choice.into();
-
-    //     // check moves
-    //     assert(game_turn.amount == 10, 'amount is wrong');
-
-    //     // check choice
-    //     assert(game_turn.choice.into() == one_red_felt, 'last direction is wrong');
-
-    //     // // get new_position
-    //     // let new_position = get!(world, caller, Position);
-
-    //     // // check new position x
-    //     // assert(new_position.vec.x == 11, 'position x is wrong');
-
-    //     // // check new position y
-    //     // assert(new_position.vec.y == 10, 'position y is wrong');
-    // }
+        // check choice
+        assert(game_turn.choice.into() == one_red_felt, 'choice is wrong');
+     }
 }
