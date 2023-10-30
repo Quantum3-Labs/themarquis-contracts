@@ -207,7 +207,7 @@ mod tests {
         
     }
 
-     #[test]
+    #[test]
     #[available_gas(30000000)]
     fn test_random() {
         // caller
@@ -218,19 +218,17 @@ mod tests {
         // call spawn()
         let game_id = actions_system.spawn(caller);
         let amount = 30;
-        let choice = Choice::ThreeRed(()); 
+        let choice = Choice::ThreeRed(());
         actions_system.move(game_id, choice, amount);
         
         // dummy vrf, FIXME
         let vrf = random(pedersen::pedersen(seed(), choice.into()), 6);
-        vrf.print(); // Beacuse of seed(), this vrf value is 3, thats is mapped into Choice::ThreeRed(())
+        vrf.print(); // Beacuse of seed() setup, this vrf value is 3, then it is mapped into Choice::ThreeRed(())
 
         actions_system.set_winner(game_id, vrf);
 
         let (game, game_turn) = get!(world, game_id, (Game, GameTurn));
         assert(game_turn.choice != Choice::None(()), 'Choice still empty');
         game.winner.print();  // Because of seed (), player wins
-
-        
     }
 }

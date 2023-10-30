@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+//use dojo::database::schema::{SchemaIntrospection};
 
 #[derive(Serde, Drop, Copy, PartialEq, Introspect)]
 enum Choice {
@@ -38,8 +39,34 @@ struct GameTurn {
     #[key]
     game_id: u32,
     player: ContractAddress,
-    choice: Choice,
-    amount: u8,
+    choice: Choice, //todo Array<Choice>,
+    amount: u8, //todo Array<u8>
+}
+
+impl ChoiceSchemaIntrospectionImpl of SchemaIntrospection<Choice> {
+    #[inline(always)]
+    fn size() -> usize {
+        1
+    }
+
+    #[inline(always)]
+    fn layout(ref layout: Array<u8>) {
+        layout.append(251);
+    }
+
+    // #[inline(always)]
+    // fn ty() -> Ty {
+    //     Ty::Enum(
+    //         Enum {
+    //             name: 'Choice',
+    //             attrs: array![].span(),
+    //             children: array![
+    //               
+    //             ]
+    //                 .span()
+    //         }
+    //     )
+    // }
 }
 
 // #[derive(Serde, Copy, Drop, Introspect)]
