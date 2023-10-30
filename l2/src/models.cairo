@@ -8,18 +8,6 @@ use starknet::ContractAddress;
 //     Up: (),
 //     Down: (),
 // }
-
-#[derive(Serde, Drop, Copy, PartialEq, Introspect)]
-enum Choice {
-    None: (),
-    OneRed: (),
-    TwoBlack: (),
-    ThreeRed: (),
-    FourBlack: (),
-    FiveBlack: (),
-    SixBlack: (),
-}
-
 // impl DirectionIntoFelt252 of Into<Direction, felt252> {
 //     fn into(self: Direction) -> felt252 {
 //         match self {
@@ -31,6 +19,30 @@ enum Choice {
 //         }
 //     }
 // }
+#[derive(Serde, Drop, Copy, PartialEq, Introspect)]
+enum Choice {
+    None: (),
+    OneRed: (),
+    TwoBlack: (),
+    ThreeRed: (),
+    FourBlack: (),
+    FiveBlack: (),
+    SixBlack: (),
+}
+
+impl ChoiceIntoFelt252 of Into<Choice, felt252> {
+    fn into(self: Choice) -> felt252 {
+        match self {
+            Choice::None(()) => 0,
+            Choice::OneRed(()) => 1,
+            Choice::TwoBlack(()) => 2,
+            Choice::ThreeRed(()) => 3,
+            Choice::FourBlack(()) => 4,
+            Choice::FiveBlack(()) => 5,
+            Choice::SixBlack(()) => 6,
+        }
+    }
+}
 
 #[derive(Model, Drop, Serde)]
 struct Game {
@@ -44,7 +56,6 @@ struct Game {
 struct GameTurn {
     #[key]
     game_id: u32,
-    #[key]
     player: ContractAddress,
     choice: Choice,
     amount: u8,
