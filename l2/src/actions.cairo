@@ -6,6 +6,7 @@ use l2::models::{Choice};
 trait IActions<TContractState> {
     fn spawn(self: @TContractState, player_address: ContractAddress) -> u32;
     fn move(self: @TContractState, game_id: u32, choice: Choice, amount: u8);
+    fn reveal_winner(self: @TContractState, game_id: u32);
 }
 
 // dojo decorator
@@ -80,6 +81,25 @@ mod actions {
 
             // Emit an event to the world to notify about the player's move.
             emit!(world, Moved { game_id, player, amount });
+        }
+
+        fn reveal_winner(self: @ContractState, game_id: u32) {
+            // Access the world dispatcher for reading.
+            let world = self.world_dispatcher.read();
+
+            // Retrieve current game and game_turn data from the world.
+            let (mut game, game_turn) = get!(world, game_id, (Game, GameTurn));
+
+            // FIXME: Retrieve vrf value 
+            let vrf = Choice::OneRed(());
+
+            if vrf == game_turn.choice {
+                game.winner = game_turn.player;
+            } else {
+                game.winner = starknet::contract_address_const::<0x00>();
+            }
+            // Update the world state with the new moves data and position.
+            set!(world, (game, game_turn));
         }
     }
 }
@@ -159,5 +179,26 @@ mod tests {
 
         // check choice
         assert(game_turn.choice.into() == one_red_felt, 'choice is wrong');
+     }
+
+     #[test]
+    #[available_gas(30000000)]
+    fn test_reveal_winner() {
+        // caller
+        let caller = starknet::contract_address_const::<0x1>();
+
+        let (world, actions_system) = setup_world();
+
+        // call spawn()
+        let game_id = actions_system.spawn(caller);
+        let amount = 10;
+        let choice = Choice::OneRed(());
+        actions_system.move(game_id, Choice::OneRed(()), amount);
+        actions_system.reveal_winner(game_id);
+
+        let game = get!(world, game_id, (Game));
+        assert(game.winner == caller, 'winner is wrong');
+
+        
      }
 }
