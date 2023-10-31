@@ -1,0 +1,11 @@
+[package]
+name = "l2"
+version = "1.0.0"
+cairo-version = "2.2.0"
+
+[dependencies]
+alexandria_math = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "27fbf5b" }
+starknet = ">=2.2.0"
+
+[[target.starknet-contract]]
+sierra = true
