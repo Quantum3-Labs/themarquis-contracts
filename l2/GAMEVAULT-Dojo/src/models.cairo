@@ -1,6 +1,27 @@
 use starknet::ContractAddress;
 // use dojo::database::schema::{SchemaIntrospection};
 
+#[derive(Model, Drop, Serde)]
+struct Game {
+    #[key]
+    game_id: u32,
+    winner: ContractAddress,
+    playerA: ContractAddress,
+    playerB: ContractAddress,
+}
+
+#[derive(Model, Drop, Serde)]
+struct GameTurn {
+    #[key]
+    game_id: u32,
+    #[key]
+    player: ContractAddress,
+    choice1: Choice, 
+    amount1: u8,
+    choice2: Choice,
+    amount2: u8,
+}
+
 #[derive(Serde, Drop, Copy, PartialEq, Introspect)]
 enum Choice {
     None: (),
@@ -87,22 +108,6 @@ impl ChoiceIntoFelt252 of Into<Choice, felt252> {
     }
 }
 
-#[derive(Model, Drop, Serde)]
-struct Game {
-    #[key]
-    game_id: u32,
-    winner: ContractAddress,
-    player: ContractAddress,
-}
-
-#[derive(Model, Drop, Serde)]
-struct GameTurn {
-    #[key]
-    game_id: u32,
-    player: ContractAddress,
-    choice: Choice, //todo Array<Choice>,
-    amount: u8, //todo Array<u8>
-}
 // impl ChoiceSchemaIntrospectionImpl of SchemaIntrospection<Choice> {
 // #[inline(always)]
 // fn size() -> usize {
