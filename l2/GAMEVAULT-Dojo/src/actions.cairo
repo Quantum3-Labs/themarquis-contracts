@@ -133,7 +133,7 @@ mod tests {
     // import actions
     use super::{actions, IActionsDispatcher, IActionsDispatcherTrait};
 
-    //use l2::utils::{seed, random};
+    use l2::utils::{seed, random};
 
 
     // reusable function for tests
@@ -195,11 +195,11 @@ mod tests {
         let pA_choice1 = Choice::OneRed(());
         let pA_amount1 = 10;
 
-        let pA_choice2 = Choice::EightBlack(());
-        let pA_amount2 = 50;
+        let pA_choice2 = Choice::FourBlack(());
+        let pA_amount2 = 40;
 
         // test playerA move
-        // call move with OneRed and EightBlack choice
+        // call move with OneRed and FourBlack choice
         actions_system.move(game_id, playerA, pA_choice1, pA_amount1, pA_choice2, pA_amount2);
 
         let game_turnA = get!(world, (game_id, playerA), GameTurn);
@@ -268,11 +268,11 @@ mod tests {
        // turn for playerA, prepare choices
         let pA_choice1 = Choice::OneRed(());
         let pA_amount1 = 10;
-        let pA_choice2 = Choice::EightBlack(());
-        let pA_amount2 = 50;
+        let pA_choice2 = Choice::FourBlack(());
+        let pA_amount2 = 40;
 
         // test playerA move
-        // call move with OneRed and EightBlack choice
+        // call move with OneRed and FourBlack choice
         actions_system.move(game_id, playerA, pA_choice1, pA_amount1, pA_choice2, pA_amount2);
 
         let game_turnA = get!(world, (game_id, playerA), GameTurn);
@@ -289,7 +289,7 @@ mod tests {
 
         let game_turnB = get!(world, (game_id, playerB), GameTurn);
 
-        let fixed_winning_number = 8;
+        let fixed_winning_number = 4;
 
         actions_system.set_winner(game_id, fixed_winning_number);
 
@@ -299,28 +299,51 @@ mod tests {
         
     }
 
-//     #[test]
-//     #[available_gas(30000000)]
-//     fn test_random() {
-//         // caller
-//         let caller = starknet::contract_address_const::<0x1>();
+    #[test]
+    #[available_gas(30000000)]
+    fn test_random() {
+         // players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
 
-//         let (world, actions_system) = setup_world();
+        let (world, actions_system) = setup_world();
 
-//         // call spawn()
-//         let game_id = actions_system.spawn(caller);
-//         let amount = 30;
-//         let choice = Choice::ThreeRed(());
-//         actions_system.move(game_id, choice, amount);
+        // call spawn()
+        let game_id = actions_system.spawn(playerA, playerB);
+
+       // turn for playerA, prepare choices
+        let pA_choice1 = Choice::OneRed(());
+        let pA_amount1 = 10;
+        let pA_choice2 = Choice::FourBlack(());
+        let pA_amount2 = 50;
+
+        // test playerA move
+        // call move with OneRed and FourBlack choice
+        actions_system.move(game_id, playerA, pA_choice1, pA_amount1, pA_choice2, pA_amount2);
+
+        let game_turnA = get!(world, (game_id, playerA), GameTurn);
+
+        // turn for playerB
+        let pB_choice1 = Choice::TwoBlack(());
+        let pB_amount1 = 20;
+        let pB_choice2 = Choice::ThreeRed(());
+        let pB_amount2 = 30;
+
+        // test playerB move
+        // call move with TwoBlack and ThreeRed choice
+        actions_system.move(game_id, playerB, pB_choice1, pB_amount1, pB_choice2, pB_amount2);
+
+        let game_turnB = get!(world, (game_id, playerB), GameTurn);
         
-//         // dummy winning_number, FIXME
-//         let winning_number = random(pedersen::pedersen(seed(), choice.into()), 6);
-//         winning_number.print(); // Beacuse of seed() setup, this winning_number value is 3, then it is mapped into Choice::ThreeRed(())
+        // dummy vrf winning_number, FIXME
+        let winning_number = random(pedersen::pedersen(seed(), pB_choice2.into()), 6);
+        winning_number.print(); // Beacuse of seed() setup, this winning_number value is 3, then it is mapped into Choice::ThreeRed(())
 
-//         actions_system.set_winner(game_id, winning_number);
+        actions_system.set_winner(game_id, winning_number);
 
-//         let (game, game_turn) = get!(world, game_id, (Game, GameTurn));
-//         assert(game_turn.choice != Choice::None(()), 'Choice still empty');
-//         game.winner.print();  // Because of seed (), player wins
-//     }
+        let game = get!(world, game_id, Game);
+        // dummy assert, we know pB_choice2 = Choice::ThreeRed(()), so playerB wins
+        assert(game.winner == playerB, 'Wrgong winner');
+        game.winner.print();  // Because of seed (), player wins
+    }
 }
