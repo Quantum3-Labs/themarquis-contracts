@@ -160,12 +160,14 @@ mod tests {
         assert(game.playerA == contract_address_const::<0x1>(), 'playerA address is wrong');
         assert(game.playerB == contract_address_const::<0x2>(), 'playerB address is wrong');
 
+        // test setup of playerA
         let game_turn = get!(world, (game_id, playerA), (GameTurn));
         assert(game_turn.game_id == game_id, 'game_id is wrong');
         assert(game_turn.player == game.playerA, 'player is wrong');
         assert(game_turn.choice1 == Choice::None(()), 'choice is wrong');
         assert(game_turn.amount1 == 0, 'amount is wrong');
 
+        // test setup of playerB
         let game_turn = get!(world, (game_id, playerB), (GameTurn));
         assert(game_turn.game_id == game_id, 'game_id is wrong');
         assert(game_turn.player == game.playerB, 'player is wrong');
@@ -183,25 +185,56 @@ mod tests {
 
         // call spawn()
         let game_id = actions_system.spawn(playerA, playerB);
+
+        // turn for playerA, prepare choices
         let choice1 = Choice::OneRed(());
         let amount1 = 10;
 
         let choice2 = Choice::EightBlack(());
         let amount2 = 50;
 
+        // test playerA move
+        // call move with OneRed and EightBlack choice
         actions_system.move(game_id, playerA, choice1, amount1, choice2, amount2);
 
-        // call move with OneRed and EightBlack choice
         let game_turn = get!(world, (game_id, playerA), GameTurn);
 
-        // casting OneRed choice
+        // casting choices
         let one_red_felt: felt252 = choice1.into();
+        let eight_black_felt: felt252 = choice2.into();
 
-        // check moves
+        // check playerA choice1
+        assert(game_turn.choice1.into() == one_red_felt, 'choice is wrong');
         assert(game_turn.amount1 == amount1, 'amount is wrong');
 
-        // check choice
-        assert(game_turn.choice1.into() == one_red_felt, 'choice is wrong');
+        // check playerA choice2
+        assert(game_turn.choice2.into() == eight_black_felt, 'choice is wrong');
+        assert(game_turn.amount2 == amount2, 'amount is wrong');
+
+        // turn for playerB
+        let choice1 = Choice::TwoBlack(());
+        let amount1 = 20;
+
+        let choice2 = Choice::ThreeRed(());
+        let amount2 = 30;
+
+        // test playerB move
+        // call move with TwoBlack and ThreeRed choice
+        actions_system.move(game_id, playerB, choice1, amount1, choice2, amount2);
+
+        let game_turn = get!(world, (game_id, playerB), GameTurn);
+
+        // casting choices
+        let two_black_felt: felt252 = choice1.into();
+        let three_red_felt: felt252 = choice2.into();
+
+        // check playerB choice1
+        assert(game_turn.choice1.into() == two_black_felt, 'choice is wrong');
+        assert(game_turn.amount1 == amount1, 'amount is wrong');
+
+        // check playerB choice2
+        assert(game_turn.choice2.into() == three_red_felt, 'choice is wrong');
+        assert(game_turn.amount2 == amount2, 'amount is wrong');
      }
 
 //      #[test]
