@@ -25,132 +25,111 @@ struct GameTurn {
 #[derive(Serde, Drop, Copy, PartialEq, Introspect)]
 enum Choice {
     None: (),
+    Zero: (),
     OneRed: (),
     TwoBlack: (),
     ThreeRed: (),
     FourBlack: (),
-    FiveRed: (),
+    FiveBlack: (),
     SixBlack: (),
     SevenRed: (),
     EightBlack: (),
     NineRed: (),
     TenBlack: (),
-    ElevenRed: (),
-    TwelveBlack: (),
-    ThirteenRed: (),
+    ElevenBlack: (),
+    TwelveRed: (),
+    ThirteenBlack: (),
     FourteenBlack: (),
     FifteenRed: (),
-    SixteenBlack: (),
-    SeventeenRed: (),
+    SixteenRed: (),
+    SeventeenBlack: (),
     EighteenBlack: (),
-    NineteenRed: (),
-    TwentyBlack: (),
-    TwentyOneRed: (),
-    TwentyTwoBlack: (),
-    TwentyThreeRed: (),
-    TwentyFourBlack: (),
+    NineteenBlack: (),
+    TwentyRed: (),
+    TwentyOneBlack: (),
+    TwentyTwoRed: (),
+    TwentyThreeBlack: (),
+    TwentyFourRed: (),
     TwentyFiveRed: (),
-    TwentySixBlack: (),
+    TwentySixRed: (),
     TwentySevenRed: (),
     TwentyEightBlack: (),
-    TwentyNineRed: (),
+    TwentyNineBlack: (),
     ThirtyBlack: (),
     ThirtyOneRed: (),
     ThirtyTwoBlack: (),
     ThirtyThreeRed: (),
-    ThirtyFourBlack: (),
+    ThirtyFourRed: (),
     ThirtyFiveRed: (),
-    ThirtySixBlack: (),
+    OneToTwelve: (),
+    ThirteenToTwentyFour: (),
+    TwentyFiveToThirtyFive: (),
+    OneToEighteen: (),
+    NineteenToThirtyFive: (),
+    FirstLinen: (),
+    SecondLine: (),
+    ThirdLine: (),
+    Red: (),
+    Black: (),
+    Even: (),
+    Odd: (),
 }
 
 
 impl ChoiceIntoFelt252 of Into<Choice, felt252> {
     fn into(self: Choice) -> felt252 {
         match self {
-            Choice::None(()) => 0,
+            Choice::None(()) => 48,
+            Choice::Zero(()) => 0,
             Choice::OneRed(()) => 1,
             Choice::TwoBlack(()) => 2,
             Choice::ThreeRed(()) => 3,
             Choice::FourBlack(()) => 4,
-            Choice::FiveRed(()) => 5,
+            Choice::FiveBlack(()) => 5,
             Choice::SixBlack(()) => 6,
             Choice::SevenRed(()) => 7,
             Choice::EightBlack(()) => 8,
             Choice::NineRed(()) => 9,
             Choice::TenBlack(()) => 10,
-            Choice::ElevenRed(()) => 11,
-            Choice::TwelveBlack(()) => 12,
-            Choice::ThirteenRed(()) => 13,
+            Choice::ElevenBlack(()) => 11,
+            Choice::TwelveRed(()) => 12,
+            Choice::ThirteenBlack(()) => 13,
             Choice::FourteenBlack(()) => 14,
             Choice::FifteenRed(()) => 15,
-            Choice::SixteenBlack(()) => 16,
-            Choice::SeventeenRed(()) => 17,
+            Choice::SixteenRed(()) => 16,
+            Choice::SeventeenBlack(()) => 17,
             Choice::EighteenBlack(()) => 18,
-            Choice::NineteenRed(()) => 19,
-            Choice::TwentyBlack(()) => 20,
-            Choice::TwentyOneRed(()) => 21,
-            Choice::TwentyTwoBlack(()) => 22,
-            Choice::TwentyThreeRed(()) => 23,
-            Choice::TwentyFourBlack(()) => 24,
+            Choice::NineteenBlack(()) => 19,
+            Choice::TwentyRed(()) => 20,
+            Choice::TwentyOneBlack(()) => 21,
+            Choice::TwentyTwoRed(()) => 22,
+            Choice::TwentyThreeBlack(()) => 23,
+            Choice::TwentyFourRed(()) => 24,
             Choice::TwentyFiveRed(()) => 25,
-            Choice::TwentySixBlack(()) => 26,
+            Choice::TwentySixRed(()) => 26,
             Choice::TwentySevenRed(()) => 27,
             Choice::TwentyEightBlack(()) => 28,
-            Choice::TwentyNineRed(()) => 29,
+            Choice::TwentyNineBlack(()) => 29,
             Choice::ThirtyBlack(()) => 30,
             Choice::ThirtyOneRed(()) => 31,
             Choice::ThirtyTwoBlack(()) => 32,
             Choice::ThirtyThreeRed(()) => 33,
-            Choice::ThirtyFourBlack(()) => 34,
+            Choice::ThirtyFourRed(()) => 34,
             Choice::ThirtyFiveRed(()) => 35,
-            Choice::ThirtySixBlack(()) => 36,
+            Choice::OneToTwelve(()) => 36,
+            Choice::ThirteenToTwentyFour(()) => 37,
+            Choice::TwentyFiveToThirtyFive(()) => 38,
+            Choice::OneToEighteen(()) => 39,
+            Choice::NineteenToThirtyFive(()) => 40,
+            Choice::FirstLinen(()) => 41,
+            Choice::SecondLine(()) => 42,
+            Choice::ThirdLine(()) => 43,
+            Choice::Red(()) => 44,
+            Choice::Black(()) => 45,
+            Choice::Even(()) => 46,
+            Choice::Odd(()) => 47,
         }
     }
 }
 
-// impl ChoiceSchemaIntrospectionImpl of SchemaIntrospection<Choice> {
-// #[inline(always)]
-// fn size() -> usize {
-//    1
-//}
-//
-// #[inline(always)]
-// fn layout(ref layout: Array<u8>) {
-//         layout.append(251);
-// }
-
-// #[inline(always)]
-// fn ty() -> Ty {
-//     Ty::Enum(
-//         Enum {
-//             name: 'Choice',
-//             attrs: array![].span(),
-//             children: array![
-//               
-//             ]
-//                 .span()
-//         }
-//     )
-// }
-// }
-
-// #[derive(Serde, Copy, Drop, Introspect)]
-// enum Direction {
-//     None: (),
-//     Left: (),
-//     Right: (),
-//     Up: (),
-//     Down: (),
-// }
-// impl DirectionIntoFelt252 of Into<Direction, felt252> {
-//     fn into(self: Direction) -> felt252 {
-//         match self {
-//             Direction::None(()) => 0,
-//             Direction::Left(()) => 1,
-//             Direction::Right(()) => 2,
-//             Direction::Up(()) => 3,
-//             Direction::Down(()) => 4,
-//         }
-//     }
-// }
 
