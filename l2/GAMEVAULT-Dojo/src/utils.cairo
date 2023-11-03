@@ -1,11 +1,17 @@
 use l2::models::{GameTurn, Choice};
 
-fn betting(game_turn: GameTurn, choice: Choice, amount: u8) -> GameTurn {
+fn betting(game_turn: GameTurn, choice1: Choice, amount1: u8, choice2: Choice, amount2: u8) -> GameTurn {
+    assert(game_turn.choice1 == Choice::None(()), 'Player has already chosen');
+    assert(game_turn.amount1 == 0, 'Player has already bet amount');
+    assert(game_turn.choice2 == Choice::None(()), 'Player has already chosen');
+    assert(game_turn.amount2 == 0, 'Player has already bet amount');
     GameTurn {
         game_id: game_turn.game_id,
         player: game_turn.player,
-        choice,
-        amount,
+        choice1,
+        amount1,
+        choice2,
+        amount2,
     }
 }
 

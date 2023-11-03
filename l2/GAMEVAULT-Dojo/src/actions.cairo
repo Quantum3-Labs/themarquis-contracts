@@ -4,9 +4,9 @@ use l2::models::{Choice};
 // define the interface
 #[starknet::interface]
 trait IActions<TContractState> {
-    fn spawn(self: @TContractState, player_address: ContractAddress) -> u32;
-    fn move(self: @TContractState, game_id: u32, choice: Choice, amount: u8);
-    fn set_winner(self: @TContractState, game_id: u32, vrf: u8);
+    fn spawn(self: @TContractState, playerA_address: ContractAddress, playerB_address: ContractAddress) -> u32;
+    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u8, choice2: Choice, amount2: u8);
+    fn is_winning_move(self: @TContractState, game_id: u32, winning_number: u8);
 }
 
 // dojo decorator
@@ -28,7 +28,7 @@ mod actions {
     #[derive(Drop, starknet::Event)]
     struct Moved {
         game_id: u32,
-        player: ContractAddress,
+        player_address: ContractAddress,
         amount: u8
     }
 
@@ -36,7 +36,7 @@ mod actions {
     #[external(v0)]
     impl ActionsImpl of IActions<ContractState> {
         // ContractState is defined by system decorator expansion
-        fn spawn(self: @ContractState, player_address: ContractAddress) -> u32{
+        fn spawn(self: @ContractState, playerA_address: ContractAddress, playerB_address: ContractAddress) -> u32{
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
             let game_id = world.uuid();
@@ -44,16 +44,24 @@ mod actions {
             let winner = starknet::contract_address_const::<0x00>();
 
             // Get the address of the current caller, possibly the player's address.
-            let player = get_caller_address();
+            // let player = get_caller_address();
 
             set!(
                 world,
                 (
                     Game {
-                        game_id, winner, player: player_address
+                        game_id, winner, playerA: playerA_address, playerB: playerB_address
                     },
                     GameTurn {
-                        game_id, player: player_address, choice: Choice::None(()), amount: 0
+                        game_id, player: playerA_address, choice1: Choice::None(()), amount1: 0, choice2: Choice::None(()), amount2: 0
+                    }
+                )
+            );
+            set!(
+                world,
+                (
+                    GameTurn {
+                        game_id, player: playerB_address, choice1: Choice::None(()), amount1: 0, choice2: Choice::None(()), amount2: 0
                     }
                 )
             );
@@ -61,49 +69,107 @@ mod actions {
         }
 
         // Implementation of the move function for the ContractState struct.
-        fn move(self: @ContractState, game_id: u32, choice: Choice, amount: u8) {
+            fn move(self: @ContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u8, choice2: Choice, amount2: u8) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
             // Get the address of the current caller, possibly the player's address.
-            let player = get_caller_address();
+            //let player = get_caller_address();
 
             // Retrieve current game and game_turn data from the world.
-            let (game, mut game_turn) = get!(world, game_id, (Game, GameTurn));
+            let game = get!(world, game_id, Game);
+            let game_turn = get!(world, (game_id, player_address), GameTurn);
 
             // player's move.
-            //let game_turn = betting(game_turn, choice, amount);
-             game_turn.choice = choice;
-             game_turn.amount = amount;
+            let game_turn = betting(game_turn, choice1, amount1, choice2, amount2);
 
             // Update the world state with the new moves data and position.
             set!(world, (game, game_turn));
 
             // Emit an event to the world to notify about the player's move.
-            emit!(world, Moved { game_id, player, amount });
+            let amount = amount1 + amount2; // temp value. FIXME
+            emit!(world, Moved { game_id, player_address, amount});
         }
 
-        fn set_winner(self: @ContractState, game_id: u32, vrf: u8) {
+        fn is_winning_move(self: @ContractState, game_id: u32, winning_number: u8) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
-            // Retrieve current game and game_turn data from the world.
-            let (mut game, game_turn) = get!(world, game_id, (Game, GameTurn));
+            // Retrieve current game and game_turn(from playerA and playerB) data from the world.
+            let mut game = get!(world, game_id, Game);
+            let game_turnA = get!(world, (game_id, game.playerA), GameTurn);
+            let game_turnB = get!(world, (game_id, game.playerB), GameTurn);
 
-            let vrf: felt252 = vrf.into();
+            let winning_number: felt252 = winning_number.into();
 
-            if vrf == game_turn.choice.into() {
-                game.winner = game_turn.player;
-                // Update the world state with the new moves data and position.
-                set!(world, (game, game_turn));
-            }
+            if (winning_number == game_turnA.choice1.into() || winning_number == game_turnA.choice2.into()){
+                game.winner = game_turnA.player;
+            } else if ( winning_number == game_turnB.choice1.into() || winning_number == game_turnB.choice2.into()){
+                game.winner = game_turnB.player;
+            } 
+            // Update the world state with the winner Todo: move set! inside nested if else
+            set!(world, (game));
+
+//        fn is_winning_move(
+//             self: @TContractState, 
+//             game_id: u32,
+//             choice: Choice, 
+//             winning_number: u8
+//    ) {
+//          match choice {
+//                Choice::None(()) => false,
+//                Choice::ThirdDozen(()) => winning_number >= 25 && winning_number <= 36,
+//                Choice::SecondDozen(()) => winning_number >= 13 && winning_number <= 24,
+//                Choice::FirstDozen(()) => winning_number >= 1 && winning_number <= 12,
+//                Choice::ThirtyFive(()) => winning_number == 35,
+//                Choice::Red(()) => winning_number == 1
+//                    || winning_number == 3
+//                    || winning_number == 7
+//                    || winning_number == 9
+//                    || winning_number == 12
+//                    || winning_number == 15
+//                    || winning_number == 16
+//                    || winning_number == 20
+//                    || winning_number == 22
+//                    || winning_number == 24
+//                    || winning_number == 25
+//                    || winning_number == 26
+//                    || winning_number == 27
+//                    || winning_number == 31
+//                    || winning_number == 33
+//                    || winning_number == 34
+//                    || winning_number == 35
+//                    || winning_number == 36
+//                    || true, 
+//                Choice::Black(()) => winning_number == 2
+//                    || winning_number == 4
+//                    || winning_number == 5
+//                    || winning_number == 6
+//                    || winning_number == 8
+//                    || winning_number == 10
+//                    || winning_number == 11
+//                    || winning_number == 13
+//                    || winning_number == 14
+//                    || winning_number == 17
+//                    || winning_number == 18
+//                    || winning_number == 19
+//                    || winning_number == 21
+//                    || winning_number == 23
+//                    || winning_number == 28
+//                    || winning_number == 29
+//                    || winning_number == 30
+//                    || winning_number == 32
+//                    || true,
+//            }
+//        }           
+
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-        use debug::PrintTrait;
+    use debug::PrintTrait;
 
     use starknet::{class_hash::Felt252TryIntoClassHash,contract_address_const};
 
@@ -140,69 +206,148 @@ mod tests {
     #[test]
     #[available_gas(30000000)]
     fn test_spawn() {
-        // caller
-        let caller = contract_address_const::<0x1>();
+        // players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
         let (world, actions_system) = setup_world();
 
         // call spawn()
-        let game_id = actions_system.spawn(caller);
+        let game_id = actions_system.spawn(playerA, playerB);
         let game = get!(world, game_id, (Game));
         assert(game.winner == contract_address_const::<0x0>(), 'winner is wrong');
-        assert(game.player == contract_address_const::<0x1>(), 'player is wrong');
+        assert(game.playerA == contract_address_const::<0x1>(), 'playerA address is wrong');
+        assert(game.playerB == contract_address_const::<0x2>(), 'playerB address is wrong');
 
-        let game_turn = get!(world, game_id, (GameTurn));
+        // test setup of playerA
+        let game_turn = get!(world, (game_id, playerA), (GameTurn));
         assert(game_turn.game_id == game_id, 'game_id is wrong');
-        assert(game_turn.player == game.player, 'player is wrong');
-        assert(game_turn.choice == Choice::None(()), 'choice is wrong');
-        assert(game_turn.amount == 0, 'amount is wrong');
+        assert(game_turn.player == game.playerA, 'player is wrong');
+        assert(game_turn.choice1 == Choice::None(()), 'choice is wrong');
+        assert(game_turn.amount1 == 0, 'amount is wrong');
+
+        // test setup of playerB
+        let game_turn = get!(world, (game_id, playerB), (GameTurn));
+        assert(game_turn.game_id == game_id, 'game_id is wrong');
+        assert(game_turn.player == game.playerB, 'player is wrong');
+        assert(game_turn.choice1 == Choice::None(()), 'choice is wrong');
+        assert(game_turn.amount1 == 0, 'amount is wrong');
     }
     #[test]
     #[available_gas(30000000)]
     fn test_move() {
-        // caller
-        let caller = starknet::contract_address_const::<0x1>();
+        // players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
 
         let (world, actions_system) = setup_world();
 
         // call spawn()
-        let game_id = actions_system.spawn(caller);
-        let amount = 10;
-        let choice = Choice::OneRed(());
-        actions_system.move(game_id, choice, amount);
+        let game_id = actions_system.spawn(playerA, playerB);
 
-        // call move with OneRed choice
-        let game_turn = get!(world, game_id, (GameTurn));
+        // turn for playerA, prepare choices
+        let pA_choice1 = Choice::One(());
+        let pA_amount1 = 10;
 
-        // casting OneRed choice
-        let one_red_felt: felt252 = choice.into();
+        let pA_choice2 = Choice::Four(());
+        let pA_amount2 = 40;
 
-        // check moves
-        assert(game_turn.amount == amount, 'amount is wrong');
+        // test playerA move
+        // call move with One and Four choice
+        actions_system.move(game_id, playerA, pA_choice1, pA_amount1, pA_choice2, pA_amount2);
 
-        // check choice
-        assert(game_turn.choice.into() == one_red_felt, 'choice is wrong');
+        let game_turnA = get!(world, (game_id, playerA), GameTurn);
+
+        // casting choices
+        let one_felt: felt252 = pA_choice1.into();
+        let eight_felt: felt252 = pA_choice2.into();
+
+        // check playerA choice1
+        assert(game_turnA.choice1.into() == one_felt, 'choice is wrong');
+        assert(game_turnA.amount1 == pA_amount1, 'amount is wrong');
+
+        // check playerA choice2
+        assert(game_turnA.choice2.into() == eight_felt, 'choice is wrong');
+        assert(game_turnA.amount2 == pA_amount2, 'amount is wrong');
+
+        // turn for playerB
+        let pB_choice1 = Choice::Two(());
+        let pB_amount1 = 20;
+
+        let pB_choice2 = Choice::Three(());
+        let pB_amount2 = 30;
+
+        // test playerB move
+        // call move with Two and Three choice
+        actions_system.move(game_id, playerB, pB_choice1, pB_amount1, pB_choice2, pB_amount2);
+
+        let game_turnB = get!(world, (game_id, playerB), GameTurn);
+
+        // casting choices
+        let two_felt: felt252 = pB_choice1.into();
+        let three_felt: felt252 = pB_choice2.into();
+
+        // check playerB choice1
+        assert(game_turnB.choice1.into() == two_felt, 'choice is wrong');
+        assert(game_turnB.amount1 == pB_amount1, 'amount is wrong');
+
+        // check playerB choice2
+        assert(game_turnB.choice2.into() == three_felt, 'choice is wrong');
+        assert(game_turnB.amount2 == pB_amount2, 'amount is wrong');
+
+        // check PlayerA persist data
+        let game_turn = get!(world, (game_id, playerA), GameTurn);
+
+        // check playerA choice1
+        assert(game_turn.choice1.into() == one_felt, 'choice is wrong');
+        assert(game_turn.amount1 == pA_amount1, 'amount is wrong');
+
+        // check playerA choice2
+        assert(game_turn.choice2.into() == eight_felt, 'choice is wrong');
+        assert(game_turn.amount2 == pA_amount2, 'amount is wrong');
      }
 
-     #[test]
+    #[test]
     #[available_gas(30000000)]
     fn test_fixed_winner() {
-        // caller
-        let caller = starknet::contract_address_const::<0x1>();
+        // players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
 
         let (world, actions_system) = setup_world();
 
         // call spawn()
-        let game_id = actions_system.spawn(caller);
-        let amount = 20;
-        let choice = Choice::TwoBlack(());
-        actions_system.move(game_id, choice, amount);
+        let game_id = actions_system.spawn(playerA, playerB);
 
-        let fixed_number_winner = 2;
+       // turn for playerA, prepare choices
+        let pA_choice1 = Choice::One(());
+        let pA_amount1 = 10;
+        let pA_choice2 = Choice::Four(());
+        let pA_amount2 = 40;
 
-        actions_system.set_winner(game_id, fixed_number_winner);
+        // test playerA move
+        // call move with One and Four choice
+        actions_system.move(game_id, playerA, pA_choice1, pA_amount1, pA_choice2, pA_amount2);
+
+        let game_turnA = get!(world, (game_id, playerA), GameTurn);
+
+        // turn for playerB
+        let pB_choice1 = Choice::Two(());
+        let pB_amount1 = 20;
+        let pB_choice2 = Choice::Three(());
+        let pB_amount2 = 30;
+
+        // test playerB move
+        // call move with Two and Three choice
+        actions_system.move(game_id, playerB, pB_choice1, pB_amount1, pB_choice2, pB_amount2);
+
+        let game_turnB = get!(world, (game_id, playerB), GameTurn);
+
+        let fixed_winning_number = 4;
+
+        actions_system.is_winning_move(game_id, fixed_winning_number);
 
         let game = get!(world, game_id, (Game));
-        assert(game.winner == starknet::contract_address_const::<0x1>(), 'winner is not player');
+        assert(game.winner == starknet::contract_address_const::<0x1>(), 'winner is not playerA');
 
         
     }
@@ -210,25 +355,48 @@ mod tests {
     #[test]
     #[available_gas(30000000)]
     fn test_random() {
-        // caller
-        let caller = starknet::contract_address_const::<0x1>();
+         // players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
 
         let (world, actions_system) = setup_world();
 
         // call spawn()
-        let game_id = actions_system.spawn(caller);
-        let amount = 30;
-        let choice = Choice::ThreeRed(());
-        actions_system.move(game_id, choice, amount);
+        let game_id = actions_system.spawn(playerA, playerB);
+
+       // turn for playerA, prepare choices
+        let pA_choice1 = Choice::One(());
+        let pA_amount1 = 10;
+        let pA_choice2 = Choice::Four(());
+        let pA_amount2 = 50;
+
+        // test playerA move
+        // call move with One and Four choice
+        actions_system.move(game_id, playerA, pA_choice1, pA_amount1, pA_choice2, pA_amount2);
+
+        let game_turnA = get!(world, (game_id, playerA), GameTurn);
+
+        // turn for playerB
+        let pB_choice1 = Choice::Two(());
+        let pB_amount1 = 20;
+        let pB_choice2 = Choice::Three(());
+        let pB_amount2 = 30;
+
+        // test playerB move
+        // call move with Two and Three choice
+        actions_system.move(game_id, playerB, pB_choice1, pB_amount1, pB_choice2, pB_amount2);
+
+        let game_turnB = get!(world, (game_id, playerB), GameTurn);
         
-        // dummy vrf, FIXME
-        let vrf = random(pedersen::pedersen(seed(), choice.into()), 6);
-        vrf.print(); // Beacuse of seed() setup, this vrf value is 3, then it is mapped into Choice::ThreeRed(())
+        // dummy vrf winning_number, FIXME
+        let winning_number = random(pedersen::pedersen(seed(), pB_choice2.into()), 6);
+        winning_number.print(); // Beacuse of seed() setup, this winning_number value is 3, then it is mapped into Choice::Three(())
 
-        actions_system.set_winner(game_id, vrf);
+        actions_system.is_winning_move(game_id, winning_number);
 
-        let (game, game_turn) = get!(world, game_id, (Game, GameTurn));
-        assert(game_turn.choice != Choice::None(()), 'Choice still empty');
+        let game = get!(world, game_id, Game);
+        // dummy assert, we know pB_choice2 = Choice::Three(()), so playerB wins
+        assert(game.winner == playerB, 'Wrgong winner');
         game.winner.print();  // Because of seed (), player wins
     }
 }
