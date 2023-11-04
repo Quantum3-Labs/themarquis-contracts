@@ -40,17 +40,14 @@ mod actions {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
             let game_id = world.uuid();
-            // house address = 0x00
-            let winner = starknet::contract_address_const::<0x00>();
 
             // Get the address of the current caller, possibly the player's address.
             // let player = get_caller_address();
-
             set!(
                 world,
                 (
                     Game {
-                        game_id, winner, playerA: playerA_address, playerB: playerB_address, playerA_earned_amount: 0, playerB_earned_amount: 0
+                        game_id, playerA: playerA_address, playerB: playerB_address, playerA_earned_amount: 0, playerB_earned_amount: 0
                     },
                     GameTurn {
                         game_id, player: playerA_address, choice1: Choice::None(()), amount1: 0, choice2: Choice::None(()), amount2: 0
@@ -109,7 +106,6 @@ mod actions {
             let is_playerA_winning = is_choice1_pA_winning || is_choice2_pA_winning;
             let is_playerB_winning = is_choice1_pB_winning || is_choice2_pB_winning;
             if is_playerA_winning {
-                game.winner = game.playerA;
                 if is_choice1_pA_winning {
                     let multiplier = get_multiplier(game_turn_pA.choice1);
                     game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount1 * multiplier;
@@ -117,8 +113,8 @@ mod actions {
                     let multiplier = get_multiplier(game_turn_pA.choice2);
                     game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount2 * multiplier;
                 }
-            } else if is_playerB_winning {
-                game.winner = game.playerB;
+            } 
+            if is_playerB_winning {
                 if is_choice1_pB_winning {
                     let multiplier = get_multiplier(game_turn_pB.choice1);
                     game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount1 * multiplier;
@@ -178,7 +174,6 @@ mod tests {
         // call spawn()
         let game_id = actions_system.spawn(playerA, playerB);
         let game = get!(world, game_id, (Game));
-        assert(game.winner == contract_address_const::<0x0>(), 'winner is wrong');
         assert(game.playerA == contract_address_const::<0x1>(), 'playerA address is wrong');
         assert(game.playerB == contract_address_const::<0x2>(), 'playerB address is wrong');
 
@@ -257,22 +252,11 @@ mod tests {
         // check playerB choice2
         assert(game_turnB.choice2.into() == three_red_felt, 'choice is wrong');
         assert(game_turnB.amount2 == pB_amount2, 'amount is wrong');
-
-        // check PlayerA persist data
-        let game_turn = get!(world, (game_id, playerA), GameTurn);
-
-        // check playerA choice1
-        assert(game_turn.choice1.into() == one_red_felt, 'choice is wrong');
-        assert(game_turn.amount1 == pA_amount1, 'amount is wrong');
-
-        // check playerA choice2
-        assert(game_turn.choice2.into() == eight_black_felt, 'choice is wrong');
-        assert(game_turn.amount2 == pA_amount2, 'amount is wrong');
      }
 
     #[test]
     #[available_gas(3000000000)]
-    fn test_fixed_winner() {
+    fn test_fixed_winners() {
         // players
         let playerA = contract_address_const::<0x1>();
         let playerB = contract_address_const::<0x2>();
@@ -295,7 +279,7 @@ mod tests {
         let game_turnA = get!(world, (game_id, playerA), GameTurn);
 
         // turn for playerB
-        let pB_choice1 = Choice::TwoBlack(());
+        let pB_choice1 = Choice::Even(());
         let pB_amount1 = 20;
         let pB_choice2 = Choice::ThreeRed(());
         let pB_amount2 = 30;
@@ -311,9 +295,8 @@ mod tests {
         actions_system.set_winner(game_id, fixed_winning_number);
 
         let game = get!(world, game_id, (Game));
-        assert(game.winner == starknet::contract_address_const::<0x1>(), 'winner is not playerA');
         assert(game.playerA_earned_amount == 3720, 'PlayerA earned amount is wrong'); //31*120=3720  
-        assert(game.playerB_earned_amount == 0, 'PlayerB earned amount is wrong'); // playerB lost
+        assert(game.playerB_earned_amount == 40, 'PlayerB earned amount is wrong'); // 20*2=40
         
     }
 

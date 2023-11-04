@@ -5,7 +5,7 @@ use starknet::ContractAddress;
 struct Game {
     #[key]
     game_id: u32,
-    winner: ContractAddress,
+    //winner: ContractAddress,
     playerA: ContractAddress,
     playerB: ContractAddress,
     playerA_earned_amount: u32,
