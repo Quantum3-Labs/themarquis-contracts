@@ -103,25 +103,21 @@ mod actions {
             let is_choice1_pB_winning = is_winning_move(game_turn_pB.choice1, winning_number);
             let is_choice2_pB_winning = is_winning_move(game_turn_pB.choice2, winning_number);
 
-            let is_playerA_winning = is_choice1_pA_winning || is_choice2_pA_winning;
-            let is_playerB_winning = is_choice1_pB_winning || is_choice2_pB_winning;
-            if is_playerA_winning {
-                if is_choice1_pA_winning {
-                    let multiplier = get_multiplier(game_turn_pA.choice1);
-                    game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount1 * multiplier;
-                } else if is_choice2_pA_winning {
-                    let multiplier = get_multiplier(game_turn_pA.choice2);
-                    game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount2 * multiplier;
-                }
-            } 
-            if is_playerB_winning {
-                if is_choice1_pB_winning {
-                    let multiplier = get_multiplier(game_turn_pB.choice1);
-                    game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount1 * multiplier;
-                } else if is_choice2_pB_winning {
-                    let multiplier = get_multiplier(game_turn_pB.choice2);
-                    game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount2 * multiplier;
-                }
+            if is_choice1_pA_winning {
+                let multiplier = get_multiplier(game_turn_pA.choice1);
+                game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount1 * multiplier;
+            }  
+            if is_choice2_pA_winning {
+                let multiplier = get_multiplier(game_turn_pA.choice2);
+                game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount2 * multiplier;
+            }
+            if is_choice1_pB_winning {
+                let multiplier = get_multiplier(game_turn_pB.choice1);
+                game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount1 * multiplier;
+            }  
+            if is_choice2_pB_winning {
+                let multiplier = get_multiplier(game_turn_pB.choice2);
+                game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount2 * multiplier;
             }
             set!(world, (game));
         }
