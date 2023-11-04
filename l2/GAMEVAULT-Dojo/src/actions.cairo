@@ -5,15 +5,18 @@ use l2::models::{Choice};
 #[starknet::interface]
 trait IActions<TContractState> {
     fn spawn(self: @TContractState, playerA_address: ContractAddress, playerB_address: ContractAddress) -> u32;
+    fn spawn_v2(self: @TContractState) -> u32;
     fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u32, choice2: Choice, amount2: u32);
+    fn move_v2(self: @TContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32);
     fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
+    fn set_winner_v2(self: @TContractState, game_id: u32, winning_number: u8);
 }
 
 // dojo decorator
 #[dojo::contract]
 mod actions {
     use starknet::{ContractAddress, get_caller_address};
-    use l2::models::{Game, GameTurn,Choice};
+    use l2::models::{Game, GameTurn, Choice, Move};
     use l2::utils::{betting, seed, random, is_winning_move,get_multiplier};
     use super::IActions;
 
@@ -47,7 +50,7 @@ mod actions {
                 world,
                 (
                     Game {
-                        game_id, playerA: playerA_address, playerB: playerB_address, playerA_earned_amount: 0, playerB_earned_amount: 0
+                        game_id, playerA: playerA_address, playerB: playerB_address, playerA_earned_amount: 0, playerB_earned_amount: 0, move_count: 0, last_total_paid: 0
                     },
                     GameTurn {
                         game_id, player: playerA_address, choice1: Choice::None(()), amount1: 0, choice2: Choice::None(()), amount2: 0
@@ -62,6 +65,13 @@ mod actions {
                     }
                 )
             );
+            game_id
+        }
+
+        fn spawn_v2(self: @ContractState) -> u32{
+            // Access the world dispatcher for reading.
+            let world = self.world_dispatcher.read();
+            let game_id = world.uuid();
             game_id
         }
 
@@ -86,6 +96,60 @@ mod actions {
             // Emit an event to the world to notify about the player's move.
             let amount = amount1 + amount2; // temp value. FIXME
             emit!(world, Moved { game_id, player_address, amount});
+        }
+
+        // Implementation of the move function for the ContractState struct.
+        fn move_v2(self: @ContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) {
+            // Access the world dispatcher for reading.
+            let world = self.world_dispatcher.read();
+
+            // Retrieve current game and game_turn data from the world.
+            let MAX_AMOUNT_MOVES = 100;
+            let mut curr_game = get!(world, game_id, Game);
+            assert(curr_game.move_count <= MAX_AMOUNT_MOVES, 'Moves limit reached');
+            assert(choice.into() != 48, 'Choice cannot be empty move');
+            assert(amount > 0, 'Amount cannot be zero');
+
+            // fetch current move_model
+            let mut curr_move = get!(world, (game_id, curr_game.move_count), Move);
+            curr_move.player = player_address;
+            curr_move.choice = choice;
+            curr_move.amount = amount;
+
+            // update move count
+            curr_game.move_count = curr_game.move_count + 1;
+            set!(world, (curr_game, curr_move));
+        }
+
+        fn set_winner_v2(self: @ContractState, game_id: u32, winning_number: u8) {
+
+            let world = self.world_dispatcher.read();
+            let mut curr_game = get!(world, game_id, Game);
+
+            // get number of moves  
+            let move_count = curr_game.move_count;
+
+            let mut curr_move_counter = 0;
+            let mut aggregate_amount = 0;
+            // iterate over moves
+            loop {
+                if curr_move_counter == move_count {
+                    break;
+                }
+                let curr_move = get!(world, (game_id, curr_move_counter), Move);
+                // check if player choice is winning
+                let is_choice_winning = is_winning_move(curr_move.choice, winning_number);
+                if is_choice_winning {
+                    let multiplier = get_multiplier(curr_move.choice);
+                    aggregate_amount = aggregate_amount + curr_move.amount * multiplier;
+                }
+                curr_move_counter = curr_move_counter + 1;
+            };
+
+            // update game state
+            curr_game.last_total_paid = aggregate_amount;
+            curr_game.move_count = 0;
+            set!(world, (curr_game));
         }
 
         fn set_winner(self: @ContractState, game_id: u32, winning_number: u8) {
@@ -137,7 +201,7 @@ mod tests {
 
     // import models
     use l2::models::{game, game_turn};
-    use l2::models::{Game, GameTurn, Choice};
+    use l2::models::{Game, GameTurn, Choice, Move};
 
     // import actions
     use super::{actions, IActionsDispatcher, IActionsDispatcherTrait};
@@ -296,6 +360,115 @@ mod tests {
         
     }
 
+    #[test]
+    #[available_gas(3000000000)]
+    fn test_v2() {
+        // initialize game and spawn 
+        let (world, actions_system) = setup_world();
+        let game_id = actions_system.spawn_v2();
+
+        // choose random number of players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
+        let playerC = contract_address_const::<0x3>();
+        let playerD = contract_address_const::<0x4>();
+
+        // playerB moves
+        actions_system.move_v2(game_id, playerB, Choice::OneRed(()), 70);
+        // playerC moves
+        actions_system.move_v2(game_id, playerC, Choice::TwoBlack(()), 20);
+        // playerA moves
+        actions_system.move_v2(game_id, playerA, Choice::ThreeRed(()), 30);
+        // playerD moves
+        actions_system.move_v2(game_id, playerD, Choice::FourBlack(()), 40);
+        // player B moves again
+        actions_system.move_v2(game_id, playerB, Choice::Even(()), 50);
+
+        let curr_game = get!(world, (game_id), Game);
+        assert(curr_game.move_count == 5, 'Move count is wrong');
+
+        // check data of each move
+        let curr_move = get!(world, (game_id, 0), Move);
+        assert(curr_move.player == playerB, 'Player is wrong');
+        assert(curr_move.choice.into() == 1, 'Choice is wrong');
+        assert(curr_move.amount == 70, 'Amount is wrong');
+
+        let curr_move = get!(world, (game_id, 1), Move);
+        assert(curr_move.player == playerC, 'Player is wrong');
+        assert(curr_move.choice.into() == 2, 'Choice is wrong');
+        assert(curr_move.amount == 20, 'Amount is wrong');
+
+        let curr_move = get!(world, (game_id, 2), Move);
+        assert(curr_move.player == playerA, 'Player is wrong');
+        assert(curr_move.choice.into() == 3, 'Choice is wrong');
+        assert(curr_move.amount == 30, 'Amount is wrong');
+        
+        let curr_move = get!(world, (game_id, 3), Move);
+        assert(curr_move.player == playerD, 'Player is wrong');
+        assert(curr_move.choice.into() == 4, 'Choice is wrong');
+        assert(curr_move.amount == 40, 'Amount is wrong');
+
+        let curr_move = get!(world, (game_id, 4), Move);
+        assert(curr_move.player == playerB, 'Player is wrong');
+        assert(curr_move.choice.into() == 46, 'Choice is wrong');
+        assert(curr_move.amount == 50, 'Amount is wrong');
+
+        // set winner
+        actions_system.set_winner_v2(game_id, 4);
+
+        // check total paid in this game
+        let curr_game = get!(world, (game_id), Game); 
+        
+        // 31 * 40 + 50 * 2 = 1320
+        assert(curr_game.last_total_paid == 1340, 'Total paid is wrong');
+
+        // play again -- WE DONT NEED SPAWN AGAIN
+
+        // playerA moves
+        actions_system.move_v2(game_id, playerA, Choice::OneRed(()), 70);
+        // playerB moves
+        actions_system.move_v2(game_id, playerB, Choice::TwoBlack(()), 20);
+        // playerC moves
+        actions_system.move_v2(game_id, playerC, Choice::EighteenBlack(()), 30);
+        // playerD moves
+        actions_system.move_v2(game_id, playerD, Choice::OneToTwelve(()), 40);
+        // player A moves again
+        actions_system.move_v2(game_id, playerA, Choice::Even(()), 50);
+        // player C moves again
+        actions_system.move_v2(game_id, playerC, Choice::OneRed(()), 70);
+        // player C moves again
+        actions_system.move_v2(game_id, playerC, Choice::TwoBlack(()), 20);
+        // player D moves again
+        actions_system.move_v2(game_id, playerD, Choice::ThreeRed(()), 30);
+
+        let curr_game = get!(world, (game_id), Game);
+        assert(curr_game.move_count == 8, 'Move count is wrong');
+
+        // check data of some random moves
+        let curr_move = get!(world, (game_id, 0), Move);
+        assert(curr_move.player == playerA, 'Player is wrong');
+        assert(curr_move.choice.into() == 1, 'Choice is wrong');
+        assert(curr_move.amount == 70, 'Amount is wrong');
+
+        let curr_move = get!(world, (game_id, 1), Move);
+        assert(curr_move.player == playerB, 'Player is wrong');
+        assert(curr_move.choice.into() == 2, 'Choice is wrong');
+        assert(curr_move.amount == 20, 'Amount is wrong');
+
+        let curr_move = get!(world, (game_id, 2), Move);
+        assert(curr_move.player == playerC, 'Player is wrong');
+        assert(curr_move.choice.into() == 18, 'Choice is wrong');
+        assert(curr_move.amount == 30, 'Amount is wrong');
+
+        // set winner
+        actions_system.set_winner_v2(game_id, 7);
+
+        // check total paid in this game
+        let curr_game = get!(world, (game_id), Game);
+        // 120
+        assert(curr_game.last_total_paid == 120, 'Total paid is wrong');
+
+    }
     // #[test]
     // #[available_gas(30000000)]
     // #[ignore]

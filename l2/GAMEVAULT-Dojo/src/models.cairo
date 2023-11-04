@@ -10,6 +10,18 @@ struct Game {
     playerB: ContractAddress,
     playerA_earned_amount: u32,
     playerB_earned_amount: u32,
+    move_count: u32,
+    last_total_paid: u32,
+}
+#[derive(Model, Drop, Serde)]
+struct Move {
+    #[key]
+    game_id: u32,
+    #[key]
+    move_id: u32,
+    player: ContractAddress,
+    choice: Choice,
+    amount: u32,
 }
 
 #[derive(Model, Drop, Serde)]
