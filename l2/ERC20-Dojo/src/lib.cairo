@@ -1,5 +1,9 @@
 mod erc20;
-mod models;
-mod tests;
-mod utils;
-mod constants;
+mod erc20_models;
+
+#[cfg(test)]
+mod tests {
+    mod tests;
+    mod utils;
+    mod constants;
+}

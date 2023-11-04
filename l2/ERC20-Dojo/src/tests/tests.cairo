@@ -7,8 +7,8 @@ use core::traits::TryInto;
 use integer::BoundedInt;
 use integer::u256;
 use integer::u256_from_felt252;
-use dojo_erc::utils;
-use dojo_erc::constants::{
+use dojo_erc::tests::utils;
+use dojo_erc::tests::constants::{
     ZERO, OWNER, SPENDER, RECIPIENT, NAME, SYMBOL, DECIMALS, SUPPLY, VALUE,
 };
 use dojo_erc::erc20::erc_systems::Approval;
@@ -24,7 +24,7 @@ use dojo::test_utils::{spawn_test_world, deploy_contract};
 use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
 use dojo_erc::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-use dojo_erc::models::{
+use dojo_erc::erc20_models::{
     ERC20Allowance, erc_20_allowance, ERC20Balance, erc_20_balance, ERC20Meta, erc_20_meta
 };
 use dojo_erc::erc20::erc_systems::_worldContractMemberStateTrait;

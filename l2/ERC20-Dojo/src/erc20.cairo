@@ -1,8 +1,6 @@
 use starknet::ContractAddress;
 use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
 
-
-
 #[starknet::interface]
 trait IERC20<TState> {
     fn name(self: @TState) -> felt252;
@@ -31,7 +29,7 @@ trait IERC20CamelOnly<TState> {
 #[starknet::contract]
 mod erc_systems {
     use core::option::OptionTrait;
-use dojo_erc::models::{ERC20Allowance, ERC20Balance, ERC20Meta};
+use dojo_erc::erc20_models::{ERC20Allowance, ERC20Balance, ERC20Meta};
     use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
     use integer::BoundedInt;
     use super::IERC20;
