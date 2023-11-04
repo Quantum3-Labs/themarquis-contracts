@@ -100,14 +100,15 @@ mod actions {
             let game_turn_pA = get!(world, (game_id, game.playerA), GameTurn);
             let game_turn_pB = get!(world, (game_id, game.playerB), GameTurn);
 
-
+            // check if playerA choices or playerB choices are winning
             let is_choice1_pA_winning = is_winning_move(game_turn_pA.choice1, winning_number);
             let is_choice2_pA_winning = is_winning_move(game_turn_pA.choice2, winning_number);
             let is_choice1_pB_winning = is_winning_move(game_turn_pB.choice1, winning_number);
             let is_choice2_pB_winning = is_winning_move(game_turn_pB.choice2, winning_number);
-            let is_pA_winning = is_choice1_pA_winning || is_choice2_pA_winning;
-            let is_choice_pB_winning = is_choice1_pB_winning || is_choice2_pB_winning;
-            if is_pA_winning {
+
+            let is_playerA_winning = is_choice1_pA_winning || is_choice2_pA_winning;
+            let is_playerB_winning = is_choice1_pB_winning || is_choice2_pB_winning;
+            if is_playerA_winning {
                 game.winner = game.playerA;
                 if is_choice1_pA_winning {
                     let multiplier = get_multiplier(game_turn_pA.choice1);
@@ -116,7 +117,7 @@ mod actions {
                     let multiplier = get_multiplier(game_turn_pA.choice2);
                     game.winning_pool = game.winning_pool + game_turn_pA.amount2 * multiplier;
                 }
-            } else if is_choice_pB_winning {
+            } else if is_playerB_winning {
                 game.winner = game.playerB;
                 if is_choice1_pB_winning {
                     let multiplier = get_multiplier(game_turn_pB.choice1);

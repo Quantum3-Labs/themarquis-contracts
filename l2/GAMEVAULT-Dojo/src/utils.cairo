@@ -67,8 +67,8 @@ fn betting(game_turn: GameTurn, choice1: Choice, amount1: u32, choice2: Choice, 
                 Choice::ThirdLine(()) => winning_number != 0 && winning_number % 3 == 0,
                 Choice::Red(()) => winning_number == 1 || winning_number == 3 || winning_number == 7 || winning_number == 9 || winning_number == 12 || winning_number == 15 || winning_number == 16 || winning_number == 20 || winning_number == 22 || winning_number == 24 || winning_number == 25 || winning_number == 26 || winning_number == 27 || winning_number == 31 || winning_number == 33 || winning_number == 34 || winning_number == 35,
                 Choice::Black(()) => winning_number == 2 || winning_number == 4 || winning_number == 5 || winning_number == 6 || winning_number == 8 || winning_number == 10 || winning_number == 11 || winning_number == 13 || winning_number == 14 || winning_number == 17 || winning_number == 18 || winning_number == 19 || winning_number == 21 || winning_number == 23 || winning_number == 28 || winning_number == 29 || winning_number == 30 || winning_number == 32,
-                Choice::Even(()) => winning_number % 2 == 1,
-                Choice::Odd(()) => winning_number != 0 && winning_number % 2 == 0,
+                Choice::Even(()) => winning_number != 0 && winning_number % 2 == 0,
+                Choice::Odd(()) =>  winning_number % 2 == 1,
             };
          ret
        }  
