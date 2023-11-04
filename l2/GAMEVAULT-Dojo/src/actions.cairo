@@ -5,7 +5,7 @@ use l2::models::{Choice};
 #[starknet::interface]
 trait IActions<TContractState> {
     fn spawn(self: @TContractState, playerA_address: ContractAddress, playerB_address: ContractAddress) -> u32;
-    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u8, choice2: Choice, amount2: u8);
+    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u32, choice2: Choice, amount2: u32);
     fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
 }
 
@@ -14,7 +14,7 @@ trait IActions<TContractState> {
 mod actions {
     use starknet::{ContractAddress, get_caller_address};
     use l2::models::{Game, GameTurn,Choice};
-    use l2::utils::{betting, seed, random, is_winning_move};
+    use l2::utils::{betting, seed, random, is_winning_move,get_multiplier};
     use super::IActions;
 
     // declaring custom event struct
@@ -29,7 +29,7 @@ mod actions {
     struct Moved {
         game_id: u32,
         player_address: ContractAddress,
-        amount: u8
+        amount: u32
     }
 
     // impl: implement functions specified in trait
@@ -50,7 +50,7 @@ mod actions {
                 world,
                 (
                     Game {
-                        game_id, winner, playerA: playerA_address, playerB: playerB_address
+                        game_id, winner, playerA: playerA_address, playerB: playerB_address, winning_pool: 0
                     },
                     GameTurn {
                         game_id, player: playerA_address, choice1: Choice::None(()), amount1: 0, choice2: Choice::None(()), amount2: 0
@@ -69,7 +69,7 @@ mod actions {
         }
 
         // Implementation of the move function for the ContractState struct.
-            fn move(self: @ContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u8, choice2: Choice, amount2: u8) {
+            fn move(self: @ContractState, game_id: u32, player_address: ContractAddress, choice1: Choice, amount1: u32, choice2: Choice, amount2: u32) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
@@ -100,21 +100,35 @@ mod actions {
             let game_turn_pA = get!(world, (game_id, game.playerA), GameTurn);
             let game_turn_pB = get!(world, (game_id, game.playerB), GameTurn);
 
-            let winning_number: felt252 = winning_number.into();
 
-            let is_choice_pA_winnig = is_winning_move(game_turn_pA.choice1, winning_number) || is_winning_move(game_turn_pA.choice2, winning_number);
-            let is_choice_pB_winnig = is_winning_move(game_turn_pB.choice1, winning_number) || is_winning_move(game_turn_pB.choice2, winning_number);
-            
-            if is_choice_pA_winnig {
+            let is_choice1_pA_winning = is_winning_move(game_turn_pA.choice1, winning_number);
+            let is_choice2_pA_winning = is_winning_move(game_turn_pA.choice2, winning_number);
+            let is_choice1_pB_winning = is_winning_move(game_turn_pB.choice1, winning_number);
+            let is_choice2_pB_winning = is_winning_move(game_turn_pB.choice2, winning_number);
+            let is_pA_winning = is_choice1_pA_winning || is_choice2_pA_winning;
+            let is_choice_pB_winning = is_choice1_pB_winning || is_choice2_pB_winning;
+            if is_pA_winning {
                 game.winner = game.playerA;
-            } else if is_choice_pB_winnig {
+                if is_choice1_pA_winning {
+                    let multiplier = get_multiplier(game_turn_pA.choice1);
+                    game.winning_pool = game.winning_pool + game_turn_pA.amount1 * multiplier;
+                } else if is_choice2_pA_winning {
+                    let multiplier = get_multiplier(game_turn_pA.choice2);
+                    game.winning_pool = game.winning_pool + game_turn_pA.amount2 * multiplier;
+                }
+            } else if is_choice_pB_winning {
                 game.winner = game.playerB;
+                if is_choice1_pB_winning {
+                    let multiplier = get_multiplier(game_turn_pB.choice1);
+                    game.winning_pool = game.winning_pool + game_turn_pB.amount1 * multiplier;
+                } else if is_choice2_pB_winning {
+                    let multiplier = get_multiplier(game_turn_pB.choice2);
+                    game.winning_pool = game.winning_pool + game_turn_pB.amount2 * multiplier;
+                }
             }
             set!(world, (game));
         }
-
 }}
-        
 
 #[cfg(test)]
 mod tests {
@@ -256,7 +270,7 @@ mod tests {
      }
 
     #[test]
-    #[available_gas(30000000)]
+    #[available_gas(3000000000)]
     fn test_fixed_winner() {
         // players
         let playerA = contract_address_const::<0x1>();
@@ -297,7 +311,7 @@ mod tests {
 
         let game = get!(world, game_id, (Game));
         assert(game.winner == starknet::contract_address_const::<0x1>(), 'winner is not playerA');
-
+        assert(game.winning_pool == 3720, 'winning_pool is wrong'); //31*120=3720   
         
     }
 

@@ -1,6 +1,6 @@
 use l2::models::{GameTurn, Choice};
 
-fn betting(game_turn: GameTurn, choice1: Choice, amount1: u8, choice2: Choice, amount2: u8) -> GameTurn {
+fn betting(game_turn: GameTurn, choice1: Choice, amount1: u32, choice2: Choice, amount2: u32) -> GameTurn {
     assert(game_turn.choice1 == Choice::None(()), 'Player has already chosen');
     assert(game_turn.amount1 == 0, 'Player has already bet amount');
     assert(game_turn.choice2 == Choice::None(()), 'Player has already chosen');
@@ -17,9 +17,8 @@ fn betting(game_turn: GameTurn, choice1: Choice, amount1: u8, choice2: Choice, a
 
         fn is_winning_move(
             choice: Choice, 
-            winning_number: felt252
+            winning_number: u8
    ) -> bool {
-            let winning_number: u8 = winning_number.try_into().unwrap();
             let ret = match choice {
                 Choice::None(()) => false,
                 Choice::Zero(()) => 0 == winning_number,
@@ -73,6 +72,60 @@ fn betting(game_turn: GameTurn, choice1: Choice, amount1: u8, choice2: Choice, a
             };
          ret
        }  
+
+fn get_multiplier(choice: Choice) -> u32 {
+    match choice {
+        Choice::None(()) => 0,
+        Choice::Zero(()) => 41, // special one biggest win
+        Choice::OneRed(()) => 31,
+        Choice::TwoBlack(()) => 31,
+        Choice::ThreeRed(()) => 31,
+        Choice::FourBlack(()) => 31,
+        Choice::FiveBlack(()) => 31,
+        Choice::SixBlack(()) => 31,
+        Choice::SevenRed(()) => 31,
+        Choice::EightBlack(()) => 31,
+        Choice::NineRed(()) => 31,
+        Choice::TenBlack(()) => 31,
+        Choice::ElevenBlack(()) => 31,
+        Choice::TwelveRed(()) => 31,
+        Choice::ThirteenBlack(()) => 31,
+        Choice::FourteenBlack(()) => 31,
+        Choice::FifteenRed(()) => 31,
+        Choice::SixteenRed(()) => 31,
+        Choice::SeventeenBlack(()) => 31,
+        Choice::EighteenBlack(()) => 31,
+        Choice::NineteenBlack(()) => 31,
+        Choice::TwentyRed(()) => 31,
+        Choice::TwentyOneBlack(()) => 31,
+        Choice::TwentyTwoRed(()) => 31,
+        Choice::TwentyThreeBlack(()) => 31,
+        Choice::TwentyFourRed(()) => 31,
+        Choice::TwentyFiveRed(()) => 31,
+        Choice::TwentySixRed(()) => 31,
+        Choice::TwentySevenRed(()) => 31,
+        Choice::TwentyEightBlack(()) => 31,
+        Choice::TwentyNineBlack(()) => 31,
+        Choice::ThirtyBlack(()) => 31,
+        Choice::ThirtyOneRed(()) => 31,
+        Choice::ThirtyTwoBlack(()) => 31,
+        Choice::ThirtyThreeRed(()) => 31,
+        Choice::ThirtyFourRed(()) => 31,
+        Choice::ThirtyFiveRed(()) => 31,
+        Choice::OneToTwelve(()) => 3,
+        Choice::ThirteenToTwentyFour(()) => 3,
+        Choice::TwentyFiveToThirtyFive(()) => 3,
+        Choice::OneToEighteen(()) => 3,
+        Choice::NineteenToThirtyFive(()) => 3,
+        Choice::FirstLinen(()) => 3,
+        Choice::SecondLine(()) => 3,
+        Choice::ThirdLine(()) => 3,
+        Choice::Red(()) => 2,
+        Choice::Black(()) => 2,
+        Choice::Even(()) => 2,
+        Choice::Odd(()) => 2,
+       }
+    }
 
 fn seed() -> felt252 {
     starknet::get_tx_info().unbox().transaction_hash
