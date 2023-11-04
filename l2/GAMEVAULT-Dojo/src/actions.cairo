@@ -50,7 +50,7 @@ mod actions {
                 world,
                 (
                     Game {
-                        game_id, winner, playerA: playerA_address, playerB: playerB_address, winning_pool: 0
+                        game_id, winner, playerA: playerA_address, playerB: playerB_address, playerA_earned_amount: 0, playerB_earned_amount: 0
                     },
                     GameTurn {
                         game_id, player: playerA_address, choice1: Choice::None(()), amount1: 0, choice2: Choice::None(()), amount2: 0
@@ -112,19 +112,19 @@ mod actions {
                 game.winner = game.playerA;
                 if is_choice1_pA_winning {
                     let multiplier = get_multiplier(game_turn_pA.choice1);
-                    game.winning_pool = game.winning_pool + game_turn_pA.amount1 * multiplier;
+                    game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount1 * multiplier;
                 } else if is_choice2_pA_winning {
                     let multiplier = get_multiplier(game_turn_pA.choice2);
-                    game.winning_pool = game.winning_pool + game_turn_pA.amount2 * multiplier;
+                    game.playerA_earned_amount = game.playerA_earned_amount + game_turn_pA.amount2 * multiplier;
                 }
             } else if is_playerB_winning {
                 game.winner = game.playerB;
                 if is_choice1_pB_winning {
                     let multiplier = get_multiplier(game_turn_pB.choice1);
-                    game.winning_pool = game.winning_pool + game_turn_pB.amount1 * multiplier;
+                    game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount1 * multiplier;
                 } else if is_choice2_pB_winning {
                     let multiplier = get_multiplier(game_turn_pB.choice2);
-                    game.winning_pool = game.winning_pool + game_turn_pB.amount2 * multiplier;
+                    game.playerB_earned_amount = game.playerB_earned_amount + game_turn_pB.amount2 * multiplier;
                 }
             }
             set!(world, (game));
@@ -197,7 +197,7 @@ mod tests {
         assert(game_turn.amount1 == 0, 'amount is wrong');
     }
     #[test]
-    #[available_gas(30000000)]
+    #[available_gas(3000000000)]
     fn test_move() {
         // players
         let playerA = contract_address_const::<0x1>();
@@ -312,7 +312,8 @@ mod tests {
 
         let game = get!(world, game_id, (Game));
         assert(game.winner == starknet::contract_address_const::<0x1>(), 'winner is not playerA');
-        assert(game.winning_pool == 3720, 'winning_pool is wrong'); //31*120=3720   
+        assert(game.playerA_earned_amount == 3720, 'PlayerA earned amount is wrong'); //31*120=3720  
+        assert(game.playerB_earned_amount == 0, 'PlayerB earned amount is wrong'); // playerB lost
         
     }
 

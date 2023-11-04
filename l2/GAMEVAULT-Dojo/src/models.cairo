@@ -8,7 +8,8 @@ struct Game {
     winner: ContractAddress,
     playerA: ContractAddress,
     playerB: ContractAddress,
-    winning_pool: u32,
+    playerA_earned_amount: u32,
+    playerB_earned_amount: u32,
 }
 
 #[derive(Model, Drop, Serde)]
