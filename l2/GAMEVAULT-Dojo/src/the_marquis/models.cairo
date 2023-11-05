@@ -5,11 +5,6 @@ use starknet::ContractAddress;
 struct Game {
     #[key]
     game_id: u32,
-    //winner: ContractAddress,
-    playerA: ContractAddress,
-    playerB: ContractAddress,
-    playerA_earned_amount: u32,
-    playerB_earned_amount: u32,
     move_count: u32,
     last_total_paid: u32,
 }
@@ -24,17 +19,6 @@ struct Move {
     amount: u32,
 }
 
-#[derive(Model, Drop, Serde)]
-struct GameTurn {
-    #[key]
-    game_id: u32,
-    #[key]
-    player: ContractAddress,
-    choice1: Choice, 
-    amount1: u32,
-    choice2: Choice,
-    amount2: u32,
-}
 
 #[derive(Serde, Drop, Copy, PartialEq, Introspect)]
 enum Choice {

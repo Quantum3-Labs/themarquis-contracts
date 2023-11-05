@@ -1,17 +1,13 @@
-use l2::the_marquis::models::{GameTurn, Choice};
+use l2::the_marquis::models::{Move, Choice};
+use starknet::ContractAddress;
 
-fn betting(game_turn: GameTurn, choice1: Choice, amount1: u32, choice2: Choice, amount2: u32) -> GameTurn {
-    assert(game_turn.choice1 == Choice::None(()), 'Player has already chosen');
-    assert(game_turn.amount1 == 0, 'Player has already bet amount');
-    assert(game_turn.choice2 == Choice::None(()), 'Player has already chosen');
-    assert(game_turn.amount2 == 0, 'Player has already bet amount');
-    GameTurn {
-        game_id: game_turn.game_id,
-        player: game_turn.player,
-        choice1,
-        amount1,
-        choice2,
-        amount2,
+fn make_move(game_id: u32, move_id: u32, player: ContractAddress, choice: Choice, amount: u32) -> Move {
+    Move {
+        game_id,
+        move_id,
+        player,
+        choice,
+        amount
     }
 }
 
@@ -68,7 +64,7 @@ fn betting(game_turn: GameTurn, choice1: Choice, amount1: u32, choice2: Choice, 
                 Choice::Red(()) => winning_number == 1 || winning_number == 3 || winning_number == 7 || winning_number == 9 || winning_number == 12 || winning_number == 15 || winning_number == 16 || winning_number == 20 || winning_number == 22 || winning_number == 24 || winning_number == 25 || winning_number == 26 || winning_number == 27 || winning_number == 31 || winning_number == 33 || winning_number == 34 || winning_number == 35,
                 Choice::Black(()) => winning_number == 2 || winning_number == 4 || winning_number == 5 || winning_number == 6 || winning_number == 8 || winning_number == 10 || winning_number == 11 || winning_number == 13 || winning_number == 14 || winning_number == 17 || winning_number == 18 || winning_number == 19 || winning_number == 21 || winning_number == 23 || winning_number == 28 || winning_number == 29 || winning_number == 30 || winning_number == 32,
                 Choice::Even(()) => winning_number != 0 && winning_number % 2 == 0,
-                Choice::Odd(()) =>  winning_number % 2 == 1,
+                Choice::Odd(()) =>  winning_number == 1 || winning_number % 2 == 1,
             };
          ret
        }  
@@ -115,8 +111,8 @@ fn get_multiplier(choice: Choice) -> u32 {
         Choice::OneToTwelve(()) => 3,
         Choice::ThirteenToTwentyFour(()) => 3,
         Choice::TwentyFiveToThirtyFive(()) => 3,
-        Choice::OneToEighteen(()) => 3,
-        Choice::NineteenToThirtyFive(()) => 3,
+        Choice::OneToEighteen(()) => 2,
+        Choice::NineteenToThirtyFive(()) => 2,
         Choice::FirstLinen(()) => 3,
         Choice::SecondLine(()) => 3,
         Choice::ThirdLine(()) => 3,
