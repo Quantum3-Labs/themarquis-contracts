@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod actions_test {
     use debug::PrintTrait;
 
     use starknet::{class_hash::Felt252TryIntoClassHash, contract_address_const};

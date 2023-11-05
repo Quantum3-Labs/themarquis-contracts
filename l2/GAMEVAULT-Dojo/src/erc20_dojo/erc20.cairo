@@ -14,10 +14,11 @@ trait IERC20<TState> {
         ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
     ) -> bool;
     fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
-    fn initialize(ref self: TState, name: felt252, symbol: felt252, world : ContractAddress) -> bool;
+    fn initialize(ref self: TState, name: felt252, symbol: felt252, world: ContractAddress) -> bool;
     fn mint_(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
 }
 
+#[starknet::interface]
 trait IERC20CamelOnly<TState> {
     fn totalSupply(self: @TState) -> u256;
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
@@ -29,7 +30,7 @@ trait IERC20CamelOnly<TState> {
 #[starknet::contract]
 mod erc_systems {
     use core::option::OptionTrait;
-use dojo_erc::erc20_models::{ERC20Allowance, ERC20Balance, ERC20Meta};
+    use l2::erc20_dojo::erc20_models::{ERC20Allowance, ERC20Balance, ERC20Meta};
     use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
     use integer::BoundedInt;
     use super::IERC20;
@@ -133,12 +134,14 @@ use dojo_erc::erc20_models::{ERC20Allowance, ERC20Balance, ERC20Meta};
                 );
             true
         }
-        fn initialize(ref self: ContractState, name: felt252, symbol: felt252, world : ContractAddress) -> bool {
+        fn initialize(
+            ref self: ContractState, name: felt252, symbol: felt252, world: ContractAddress
+        ) -> bool {
             self._world.write(world);
-            self.initializer(name,symbol);
+            self.initializer(name, symbol);
             true
         }
-        fn mint_(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool{
+        fn mint_(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool {
             self._mint(recipient, amount);
             true
         }
@@ -265,7 +268,11 @@ use dojo_erc::erc20_models::{ERC20Allowance, ERC20Balance, ERC20Meta};
                 );
         }
 
-        fn emit_event<S, impl IntoImp: traits::Into<S, Event>, impl SDrop: Drop<S>, impl SCopy: Copy<S>>(ref self: ContractState, event: S) {
+        fn emit_event<
+            S, impl IntoImp: traits::Into<S, Event>, impl SDrop: Drop<S>, impl SCopy: Copy<S>
+        >(
+            ref self: ContractState, event: S
+        ) {
             self.emit(event);
             emit!(self.world(), event);
         }
