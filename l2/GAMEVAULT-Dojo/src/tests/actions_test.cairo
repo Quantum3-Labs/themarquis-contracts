@@ -131,7 +131,7 @@ mod actions_test {
 
         // set winner
         let fixed_winning_number = 1;
-        actions_system.set_winner(game_id, fixed_winning_number);
+        actions_system.set_winner(game_id, fixed_winning_number, 7);
 
         // check total paid in this game
         let curr_game = get!(world, (game_id), Game); 
@@ -178,7 +178,7 @@ mod actions_test {
         assert(move3.amount == 30, 'Amount is wrong');
 
         // set winner
-        actions_system.set_winner(game_id, 7);
+        actions_system.set_winner(game_id, 7, 5,);
 
         // check total paid in this game
         let curr_game = get!(world, (game_id), Game);
