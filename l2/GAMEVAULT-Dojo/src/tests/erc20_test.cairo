@@ -1,38 +1,38 @@
 //Todo: test events
 
 #[cfg(test)]
-mod tests {
-use dojo_erc::erc20::IERC20;
+mod erc20_test {
+use l2::erc20_dojo::erc20::IERC20;
 use core::traits::TryInto;
 use integer::BoundedInt;
 use integer::u256;
 use integer::u256_from_felt252;
-use dojo_erc::utils;
-use dojo_erc::constants::{
+use l2::tests::erc20_utils;
+use l2::tests::constants::{
     ZERO, OWNER, SPENDER, RECIPIENT, NAME, SYMBOL, DECIMALS, SUPPLY, VALUE,
 };
-use dojo_erc::erc20::erc_systems::Approval;
-use dojo_erc::erc20::erc_systems::ERC20Impl;
-use dojo_erc::erc20::erc_systems::{InternalImpl,WorldInteractionsImpl};
-use dojo_erc::erc20::erc_systems::Transfer;
-use dojo_erc::erc20::erc_systems;
+use l2::erc20_dojo::erc20::erc_systems::Approval;
+use l2::erc20_dojo::erc20::erc_systems::ERC20Impl;
+use l2::erc20_dojo::erc20::erc_systems::{InternalImpl,WorldInteractionsImpl};
+use l2::erc20_dojo::erc20::erc_systems::Transfer;
+use l2::erc20_dojo::erc20::erc_systems;
 use starknet::ContractAddress;
 use starknet::contract_address_const;
 use starknet::testing;
 use zeroable::Zeroable;
 use dojo::test_utils::{spawn_test_world, deploy_contract};
 use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
-use dojo_erc::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+use l2::erc20_dojo::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-use dojo_erc::models::{
+use l2::erc20_dojo::erc20_models::{
     ERC20Allowance, erc_20_allowance, ERC20Balance, erc_20_balance, ERC20Meta, erc_20_meta
 };
-use dojo_erc::erc20::erc_systems::_worldContractMemberStateTrait;
+use l2::erc20_dojo::erc20::erc_systems::_worldContractMemberStateTrait;
 use debug::PrintTrait;
 
 
 
-fn STATE() -> (IWorldDispatcher, dojo_erc::erc20::erc_systems::ContractState) {
+fn STATE() -> (IWorldDispatcher, l2::erc20_dojo::erc20::erc_systems::ContractState) {
     let world = spawn_test_world(
         array![
             erc_20_allowance::TEST_CLASS_HASH,
@@ -40,12 +40,12 @@ fn STATE() -> (IWorldDispatcher, dojo_erc::erc20::erc_systems::ContractState) {
             erc_20_meta::TEST_CLASS_HASH,
         ]
     );
-    let mut state = dojo_erc::erc20::erc_systems::contract_state_for_testing();
+    let mut state = l2::erc20_dojo::erc20::erc_systems::contract_state_for_testing();
     
     (world, state)
 }
 
-    fn setup() -> (IWorldDispatcher, dojo_erc::erc20::erc_systems::ContractState) {
+    fn setup() -> (IWorldDispatcher, l2::erc20_dojo::erc20::erc_systems::ContractState) {
        let world = spawn_test_world(
         array![
             erc_20_allowance::TEST_CLASS_HASH,
@@ -53,9 +53,9 @@ fn STATE() -> (IWorldDispatcher, dojo_erc::erc20::erc_systems::ContractState) {
             erc_20_meta::TEST_CLASS_HASH,
         ]
     );
-        let mut state = dojo_erc::erc20::erc_systems::contract_state_for_testing();
+        let mut state = l2::erc20_dojo::erc20::erc_systems::contract_state_for_testing();
         state.initialize(NAME, SYMBOL,world.contract_address);
-        utils::drop_event(ZERO());
+        erc20_utils::drop_event(ZERO());
         (world, state)
     }
 
@@ -233,7 +233,7 @@ fn test_transfer_from() {
     testing::set_caller_address(OWNER());
     state.mint_(OWNER(), SUPPLY);
     ERC20Impl::approve(ref state, SPENDER(), VALUE);
-    utils::drop_event(ZERO());
+    erc20_utils::drop_event(ZERO());
 
     testing::set_caller_address(SPENDER());
     assert(ERC20Impl::transfer_from(ref state, OWNER(), RECIPIENT(), VALUE), 'Should return true');
@@ -291,7 +291,7 @@ fn test_increase_allowance() {
     let (world, mut state) = setup();
     testing::set_caller_address(OWNER());
     ERC20Impl::approve(ref state, SPENDER(), VALUE);
-    utils::drop_event(ZERO());
+    erc20_utils::drop_event(ZERO());
 
     assert(erc_systems::increase_allowance(ref state, SPENDER(), VALUE), 'Should return true');
 
@@ -322,7 +322,7 @@ fn test_increaseAllowance() {
     let (world, mut state) = setup();
     testing::set_caller_address(OWNER());
     ERC20Impl::approve(ref state, SPENDER(), VALUE);
-    utils::drop_event(ZERO());
+    erc20_utils::drop_event(ZERO());
 
     assert(erc_systems::increaseAllowance(ref state, SPENDER(), VALUE), 'Should return true');
 
@@ -357,7 +357,7 @@ fn test_decrease_allowance() {
     let (world, mut state) = setup();
     testing::set_caller_address(OWNER());
     ERC20Impl::approve(ref state, SPENDER(), VALUE);
-    utils::drop_event(ZERO());
+    erc20_utils::drop_event(ZERO());
 
     assert(erc_systems::decrease_allowance(ref state, SPENDER(), VALUE), 'Should return true');
 
@@ -388,7 +388,7 @@ fn test_decreaseAllowance() {
     let (world, mut state) = setup();
     testing::set_caller_address(OWNER());
     ERC20Impl::approve(ref state, SPENDER(), VALUE);
-    utils::drop_event(ZERO());
+    erc20_utils::drop_event(ZERO());
 
     assert(erc_systems::decreaseAllowance(ref state, SPENDER(), VALUE), 'Should return true');
 
@@ -423,7 +423,7 @@ fn test__spend_allowance_not_unlimited() {
     let (world, mut state) = setup();
 
     InternalImpl::_approve(ref state, OWNER(), SPENDER(), SUPPLY);
-    utils::drop_event(ZERO());
+    erc20_utils::drop_event(ZERO());
 
     InternalImpl::_spend_allowance(ref state, OWNER(), SPENDER(), VALUE);
 

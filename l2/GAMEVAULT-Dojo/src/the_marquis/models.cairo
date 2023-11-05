@@ -130,4 +130,3 @@ impl ChoiceIntoFelt252 of Into<Choice, felt252> {
     }
 }
 
-
