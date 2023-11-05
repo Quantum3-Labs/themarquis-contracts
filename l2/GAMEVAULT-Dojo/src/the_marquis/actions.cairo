@@ -1,5 +1,6 @@
 use starknet::ContractAddress;
 use l2::the_marquis::models::{Choice};
+use l2::erc20_dojo::erc20::{ERC20CamelOnlyImpl};
 
 // define the interface
 #[starknet::interface]
