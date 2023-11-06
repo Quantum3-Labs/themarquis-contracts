@@ -117,7 +117,6 @@ mod actions_test {
         let playerA = contract_address_const::<0x1>();
         let playerB = contract_address_const::<0x2>();
         let playerC = contract_address_const::<0x3>();
-        let playerD = contract_address_const::<0x4>();
 
         // set 3 moves and 4 choices
         // playerB moves and chooses 
@@ -184,31 +183,39 @@ mod actions_test {
         // 31 * 70 + 50 * 2 = 2270
         assert(curr_game.last_total_paid == 2270, 'Total paid is wrong');
 
-        // // play again -- WE DONT NEED SPAWN AGAIN
+        // play again -- WE DONT NEED SPAWN AGAIN
 
-        // // playerA moves
-        // actions_system.move(game_id, playerA, Choice::OneRed(()), 70);
-        // // playerB moves
-        // actions_system.move(game_id, playerB, Choice::TwoBlack(()), 20);
-        // // playerC moves
-        // actions_system.move(game_id, playerC, Choice::EighteenBlack(()), 30);
-        // // playerD moves
-        // actions_system.move(game_id, playerD, Choice::OneToTwelve(()), 40);
-        // // player A moves again
-        // actions_system.move(game_id, playerA, Choice::Even(()), 50);
-        // // player C moves again
-        // actions_system.move(game_id, playerC, Choice::OneRed(()), 70);
-        // // player C moves again
-        // actions_system.move(game_id, playerC, Choice::TwoBlack(()), 20);
-        // // player D moves again
-        // actions_system.move(game_id, playerD, Choice::ThreeRed(()), 30);
+        let playerD = contract_address_const::<0x4>();
 
-        // let curr_game = get!(world, (game_id), Game);
-        // assert(curr_game.move_count == 8, 'Move count is wrong');
+        // playerA moves and chooses
+        let moveA_id = actions_system.move(game_id, playerA);
+        let choiceA_id = actions_system.choice(game_id, moveA_id, Choice::OneRed(()), 70);
+        // playerB moves and chooses
+        let moveB_id = actions_system.move(game_id, playerB);
+        let choiceB_id = actions_system.choice(game_id, moveB_id, Choice::TwoBlack(()), 20);
+        // playerC moves and chooses
+        let moveC_id = actions_system.move(game_id, playerC);
+        let choiceC_id = actions_system.choice(game_id, moveC_id, Choice::EighteenBlack(()), 30);
+        // playerD moves and chooses
+        let moveD_id = actions_system.move(game_id, playerD);
+        let choiceD_id = actions_system.choice(game_id, moveD_id, Choice::OneToTwelve(()), 40);
+        // player A chooses again
+        let choiceA_2_id = actions_system.choice(game_id, moveA_id, Choice::Even(()), 50);
+        // player C chooses again
+        let choiceC_2_id = actions_system.choice(game_id, moveC_id, Choice::OneRed(()), 70);
+        // player C chooses again
+        let choiceC_3_id = actions_system.choice(game_id, moveC_id, Choice::TwoBlack(()), 20);
+        // player D moves again
+        let choiceD_2_id = actions_system.choice(game_id, moveD_id, Choice::ThreeRed(()), 30);
 
-        // // check data of some random moves
-        // let move1 = get!(world, (game_id, 1), Move);
-        // assert(move1.player == playerA, 'Player is wrong');
+        let curr_game = get!(world, (game_id), Game);
+        assert(curr_game.move_count == 4, 'Move count is wrong');
+
+        // check data of some random moves
+        let move1 = get!(world, (game_id, moveA_id), Move);
+        assert(move1.player == playerA, 'Player is wrong');
+        assert(move1.choice_count == 2, 'Choice count is wrong');
+
         // assert(move1.choice.into() == 1, 'Choice is wrong');
         // assert(move1.amount == 70, 'Amount is wrong');
 
@@ -222,13 +229,13 @@ mod actions_test {
         // assert(move3.choice.into() == 18, 'Choice is wrong');
         // assert(move3.amount == 30, 'Amount is wrong');
 
-        // // set winner
-        // actions_system.set_winner(game_id, 7);
+        // set winner
+        actions_system.set_winner(game_id, 7);
 
-        // // check total paid in this game
-        // let curr_game = get!(world, (game_id), Game);
-        // // 40*3=120
-        // assert(curr_game.last_total_paid == 120, 'Total paid is wrong');
+        // check total paid in this game
+        let curr_game = get!(world, (game_id), Game);
+        // 40*3=120
+        assert(curr_game.last_total_paid == 120, 'Total paid is wrong');
 
      }
      
