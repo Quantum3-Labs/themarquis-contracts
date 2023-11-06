@@ -7,7 +7,7 @@ trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
     fn move(self: @TContractState, game_id: u32, player_address: ContractAddress) -> u32;
     fn choice(self: @TContractState, game_id: u32, move_id: u32, choice: Choice, amount: u32) -> u32;
-    //fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
+    fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
  }
 
 // dojo decorator
@@ -101,38 +101,46 @@ mod actions {
             new_choice_id
         }
 
-        // fn set_winner(self: @ContractState, game_id: u32, winning_number: u8) {
+        fn set_winner(self: @ContractState, game_id: u32, winning_number: u8) {
+            let world = self.world_dispatcher.read();
+            let mut game = get!(world, game_id, Game);
 
-        //     let world = self.world_dispatcher.read();
-        //     let mut game = get!(world, game_id, Game);
-
-        //     // get number of moves  
-        //     let move_count = game.move_count;
-
-        //     let mut curr_move_counter = 1;
-        //     let mut aggregate_amount = 0;
-        //     // iterate over moves
-        //     loop {
-        //         if curr_move_counter > move_count {
-        //             break;
-        //         }
-        //         let curr_move = get!(world, (game_id, curr_move_counter), Move);
-        //         let curr_choice = get!(world, (game_id, curr_move_counter, curr_move.choice_count), PlayerChoice);
-        //         // check if player choice is winning
-        //         let is_choice_winning = is_winning_move(curr_choice.choice, winning_number);
-        //         if is_choice_winning {
-        //             let player_earned_amount = curr_choice.amount * get_multiplier(curr_choice.choice);
-        //             // todo: transfer earned amount to player
-        //             // erc20.transfer(curr_choice.player, player_earned_amount);
-        //             aggregate_amount = aggregate_amount + player_earned_amount
-        //         }
-        //         curr_move_counter = curr_move_counter + 1;
-        //     };
-
-        //     // update game state
-        //     game.last_total_paid = aggregate_amount;
-        //     game.move_count = 0;
-        //     set!(world, (game));
-        // }
+            // get number of moves  
+            let move_count = game.move_count;
+            let mut curr_move_counter = 1;
+            let mut aggregate_amount = 0;
+            // iterate over moves
+            loop {
+                if curr_move_counter > move_count {
+                    break;
+                }
+                let curr_move = get!(world, (game_id, curr_move_counter), Move);
+                // get number of choices for current move
+                let choice_count = curr_move.choice_count;
+                let mut curr_choice_counter = 1;
+                // iterate over choices
+                loop {
+                    if curr_choice_counter > choice_count {
+                        break;
+                    }
+                    let curr_choice = get!(world, (game_id, curr_move_counter, curr_choice_counter), PlayerChoice);
+                    // check if player choice is winning
+                    let is_choice_winning = is_winning_move(curr_choice.choice, winning_number);
+                    if is_choice_winning {
+                        let player_earned_amount = curr_choice.amount * get_multiplier(curr_choice.choice);
+                        // todo: transfer earned amount to player
+                        // erc20.transfer(curr_choice.player, player_earned_amount);
+                        aggregate_amount = aggregate_amount + player_earned_amount
+                    }
+                    curr_choice_counter = curr_choice_counter + 1;
+                };
+                //todo: accumulate amount for each player and transfer total amount earned
+                curr_move_counter = curr_move_counter + 1;
+            };
+            // update game state
+            game.last_total_paid = aggregate_amount;
+            game.move_count = 0;
+            set!(world, (game));
+        }
     }
 }
