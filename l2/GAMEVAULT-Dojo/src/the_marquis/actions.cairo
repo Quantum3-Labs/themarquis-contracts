@@ -1,7 +1,8 @@
 use starknet::ContractAddress;
 use l2::the_marquis::models::{Choice};
+// use l2::erc20_dojo::erc20::erc_systems::ERC20Impl;
+// use super::erc_systems::ERC20Impl;
 
-// define the interface
 #[starknet::interface]
 trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
@@ -142,5 +143,9 @@ mod actions {
             game.move_count = 0;
             set!(world, (game));
         }
+
+        //        fn interact_with_erc20(name: felt252, symbol: felt252) {
+        //            self.initializer(name, symbol);
+        //        }
     }
 }
