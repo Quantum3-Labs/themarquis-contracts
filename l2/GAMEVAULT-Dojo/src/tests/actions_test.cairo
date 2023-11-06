@@ -51,7 +51,7 @@ mod actions_test {
 
     #[test]
     #[available_gas(3000000000)]
-    fn test_move() {
+    fn test_one_move_two_choices() {
         // set player address
         let playerA = contract_address_const::<0x1>();
 
@@ -106,90 +106,83 @@ mod actions_test {
         assert(curr_choice.amount == pA_amount2, 'Amount2 is wrong');
      }
 
-    // #[test]
-    // #[available_gas(3000000000)]
-    // fn test_fixed_winners() {
-    //     // initialize game and spawn 
-    //     let (world, actions_system) = setup_world();
-    //     let game_id = actions_system.spawn();
+    #[test]
+    #[available_gas(3000000000)]
+    fn test_fixed_winners() {
+        // initialize game and spawn 
+        let (world, actions_system) = setup_world();
+        let game_id = actions_system.spawn();
 
-    //     // choose random number of players
-    //     let playerA = contract_address_const::<0x1>();
-    //     let playerB = contract_address_const::<0x2>();
-    //     let playerC = contract_address_const::<0x3>();
-    //     let playerD = contract_address_const::<0x4>();
+        // choose random number of players
+        let playerA = contract_address_const::<0x1>();
+        let playerB = contract_address_const::<0x2>();
+        let playerC = contract_address_const::<0x3>();
+        let playerD = contract_address_const::<0x4>();
 
-    //     // playerB moves
-    //     actions_system.move(game_id, playerB, Choice::OneRed(()), 70);
-    //     // playerA moves
-    //     actions_system.move(game_id, playerA, Choice::ThreeRed(()), 30);
-    //     // playerC moves
-    //     actions_system.move(game_id, playerC, Choice::ThirtyFiveRed(()), 20);
-    //     // player B moves again
-    //     actions_system.move(game_id, playerB, Choice::Odd(()), 50);
+        // set 3 moves and 4 choices
+        // playerB moves and chooses 
+        let move1_id = actions_system.move(game_id, playerB);
+        let m1_choice1_id = actions_system.choice(game_id, move1_id, Choice::OneRed(()), 70);
+        // playerA moves and chooses 
+        let move2_id = actions_system.move(game_id, playerA);
+        let choice2_id = actions_system.choice(game_id, move2_id, Choice::ThreeRed(()), 30);
+        // playerC moves and chooses 
+        let move3_id = actions_system.move(game_id, playerC);
+        let choice3_id = actions_system.choice(game_id, move3_id, Choice::ThirtyFiveRed(()), 20);
+        // playerB chooses again
+        let m1_choice2_id = actions_system.choice(game_id, move1_id, Choice::Odd(()), 50);
 
-    //     // check game data
-    //     let curr_game = get!(world, (game_id), Game);
-    //     assert(curr_game.move_count == 4, 'Move count is wrong');
+        // check game data
+        let curr_game = get!(world, (game_id), Game);
+        assert(curr_game.move_count == 3, 'Move count is wrong');
 
-    //     // check playerB Move
-    //     let move1_id = 1;
-    //     let move1 = get!(world, (game_id, move1_id), Move);
-    //     assert(move1.player == playerB, 'Player is wrong');
-    //     assert(move1.choice_count == 1, 'Choice count is wrong');
+        // check playerB Move
+        let move1 = get!(world, (game_id, move1_id), Move);
+        assert(move1.player == playerB, 'Player is wrong');
+        assert(move1.choice_count == 2, 'Choice count is wrong');
 
-    //     // check playerB choice
-    //     let choice1_id = move1.choice_count;
-    //     let choice1 = get!(world, (game_id, move1_id, choice1_id), PlayerChoice);
-    //     assert(choice1.choice.into() == 1, 'Choice1 is wrong');
-    //     assert(choice1.amount == 70, 'Amount1 is wrong');
+        // check playerB choice
+        let m1_choice1 = get!(world, (game_id, move1_id, m1_choice1_id), PlayerChoice);
+        assert(m1_choice1.choice.into() == 1, 'Choice1 is wrong');
+        assert(m1_choice1.amount == 70, 'Amount1 is wrong');
 
-    //     // check playerA Move
-    //     let move2_id = 2;
-    //     let move2 = get!(world, (game_id, move2_id), Move);
-    //     assert(move2.player == playerA, 'Player is wrong');
-    //     assert(move2.choice_count == 1, 'Choice count is wrong');
+        // check playerA Move
+        let move2 = get!(world, (game_id, move2_id), Move);
+        assert(move2.player == playerA, 'Player is wrong');
+        assert(move2.choice_count == 1, 'Choice count is wrong');
 
-    //     // check playerA choice
-    //     let choice2_id = move2.choice_count;
-    //     let choice2 = get!(world, (game_id, move2_id, choice2_id), PlayerChoice);
-    //     assert(choice2.choice.into() == 3, 'Choice2 is wrong');
-    //     assert(choice2.amount == 30, 'Amount2 is wrong');
+        // check playerA choice
+        let choice2_id = move2.choice_count;
+        let choice2 = get!(world, (game_id, move2_id, choice2_id), PlayerChoice);
+        assert(choice2.choice.into() == 3, 'Choice2 is wrong');
+        assert(choice2.amount == 30, 'Amount2 is wrong');
 
-    //     // check playerC Move
-    //     let move3_id = 3;
-    //     let move3 = get!(world, (game_id, move3_id), Move);
-    //     assert(move3.player == playerC, 'Player is wrong');
-    //     assert(move3.choice_count == 1, 'Choice count is wrong');
+        // check playerC Move
+        let move3 = get!(world, (game_id, move3_id), Move);
+        assert(move3.player == playerC, 'Player is wrong');
+        assert(move3.choice_count == 1, 'Choice count is wrong');
 
-    //     // check playerC choice
-    //     let choice3_id = move3.choice_count;
-    //     let choice3 = get!(world, (game_id, move3_id, choice3_id), PlayerChoice);
-    //     assert(choice3.choice.into() == 35, 'Choice3 is wrong');
-    //     assert(choice3.amount == 20, 'Amount is wrong');
+        // check playerC choice
+        let choice3_id = move3.choice_count;
+        let choice3 = get!(world, (game_id, move3_id, choice3_id), PlayerChoice);
+        assert(choice3.choice.into() == 35, 'Choice3 is wrong');
+        assert(choice3.amount == 20, 'Amount is wrong');
 
 
-    //     // check playerB Move
-    //     let move4_id = 4;
-    //     let move4 = get!(world, (game_id, move4_id), Move);
-    //     assert(move4.player == playerB, 'Player is wrong');
-    //     assert(move4.choice_count == 1, 'Choice count is wrong');
+        // check playerB 2nd Choice
+        let m1_choice2 = get!(world, (game_id, move1_id, m1_choice2_id), PlayerChoice);
+        assert(m1_choice2.choice.into() == 47, 'Choice4 is wrong');
+        assert(m1_choice2.amount == 50, 'Amount is wrong');
 
-    //     // check playerB choice
-    //     let choice4_id = move4.choice_count;
-    //     let choice4 = get!(world, (game_id, move4_id, choice4_id), PlayerChoice);
-    //     assert(choice4.choice.into() == 47, 'Choice4 is wrong');
-    //     assert(choice4.amount == 50, 'Amount is wrong');
+        // set winner
+        let fixed_winning_number = 1;
+        actions_system.set_winner(game_id, fixed_winning_number);
 
-    //     // set winner
-    //     let fixed_winning_number = 1;
-    //     actions_system.set_winner(game_id, fixed_winning_number);
-
-    //     // check total paid in this game
-    //     let curr_game = get!(world, (game_id), Game); 
+        // check total paid in this game
+        let curr_game = get!(world, (game_id), Game); 
         
-    //     // 31 * 70 + 50 * 2 = 2270
-    //     assert(curr_game.last_total_paid == 2270, 'Total paid is wrong');
+        // 31 * 70 + 50 * 2 = 2270
+        assert(curr_game.last_total_paid == 2270, 'Total paid is wrong');
 
         // // play again -- WE DONT NEED SPAWN AGAIN
 
@@ -237,7 +230,7 @@ mod actions_test {
         // // 40*3=120
         // assert(curr_game.last_total_paid == 120, 'Total paid is wrong');
 
-     //}
+     }
      
     // #[test]
     // #[available_gas(30000000)]
