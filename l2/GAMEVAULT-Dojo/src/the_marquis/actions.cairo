@@ -6,7 +6,7 @@ use l2::the_marquis::models::{Choice};
 #[starknet::interface]
 trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
-    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress) -> u32;
+    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) -> u32;
     fn choice(self: @TContractState, game_id: u32, move_id: u32, choice: Choice, amount: u32) -> u32;
     fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
  }
@@ -16,7 +16,7 @@ trait IActions<TContractState> {
 mod actions {
     use starknet::{ContractAddress, contract_address_const};
     use l2::the_marquis::models::{Game,PlayerChoice, Choice, Move};
-    use l2::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, make_choice};
+    use l2::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move_and_choose, make_choice};
     use super::IActions;
 
     // declaring custom event struct
@@ -62,7 +62,7 @@ mod actions {
         }
 
         // Implementation of the move function for the ContractState struct.
-        fn move(self: @ContractState, game_id: u32, player_address: ContractAddress) -> u32{
+        fn move(self: @ContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) -> u32{
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
@@ -83,19 +83,18 @@ mod actions {
             // create new move
             let new_move_id = last_move_id + 1; // Fixme: improve here , uuid?
             //let new_choice_id = 1;//last_choice_id +1; // Fixme: improve here , uuid?
-            let choice_count = 0;
-            let new_move = make_move(game_id, new_move_id, player_address, choice_count);
+            let (new_move, new_choice) = make_move_and_choose(game_id, new_move_id, player_address, choice, amount);
 
             // update move count
             game.move_count = new_move_id;
-            set!(world, (game, new_move));
+            set!(world, (game, new_move, new_choice));
             new_move_id
         }
 
         fn choice(self: @ContractState, game_id: u32, move_id: u32, choice: Choice, amount: u32) -> u32{
             let world = self.world_dispatcher.read();
             let mut curr_move = get!(world, (game_id, move_id), Move);
-            let new_choice_id = curr_move.choice_count + 1; // Fixme: improve here , uuid?
+            let new_choice_id = curr_move.choice_count + 1; // Fixme: improve here, uuid?
             let new_choice = make_choice(game_id, move_id, new_choice_id, choice, amount);
             curr_move.choice_count = new_choice_id;
             set!(world, (curr_move, new_choice));
@@ -144,8 +143,8 @@ mod actions {
             set!(world, (game));
         }
 
-        //        fn interact_with_erc20(name: felt252, symbol: felt252) {
-        //            self.initializer(name, symbol);
-        //        }
+            //    fn interact_with_erc20(name: felt252, symbol: felt252) {
+            //        self.initializer(name, symbol);
+            //    }
     }
 }

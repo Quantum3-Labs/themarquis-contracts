@@ -11,7 +11,7 @@ mod actions_test {
     use dojo::test_utils::{spawn_test_world, deploy_contract};
 
     // import models
-    use l2::the_marquis::models::{game, move};
+    use l2::the_marquis::models::{game, move}; // player_choice?
     use l2::the_marquis::models::{Game,PlayerChoice, Choice, Move};
 
     // import actions
@@ -23,7 +23,7 @@ mod actions_test {
     // reusable function for tests
     fn setup_world() -> (IWorldDispatcher, IActionsDispatcher) {
         // models
-        let mut models = array![game::TEST_CLASS_HASH, move::TEST_CLASS_HASH];
+        let mut models = array![game::TEST_CLASS_HASH, move::TEST_CLASS_HASH]; //player_choice::TEST_CLASS_HASH?
         // deploy world with models
         let world = spawn_test_world(models);
 
@@ -60,15 +60,11 @@ mod actions_test {
         // call spawn()
         let game_id = actions_system.spawn();
 
-        // turn for playerA, prepare move
-        let move_id = actions_system.move(game_id, playerA);
-
-        // prepare choice 1
+        // turn for playerA, prepare move and prepare choice 1
         let pA_choice = Choice::OneRed(());
         let pA_amount = 10;
-        let choice_id = actions_system.choice(game_id, move_id, pA_choice, pA_amount);
-
-        // call move with OneRed choice
+        let move_id = actions_system.move(game_id, playerA, pA_choice, pA_amount);
+        let choice_id = 1;
 
         // check game data
         let curr_game = get!(world, (game_id), Game);
@@ -120,14 +116,14 @@ mod actions_test {
 
         // set 3 moves and 4 choices
         // playerB moves and chooses 
-        let move1_id = actions_system.move(game_id, playerB);
-        let m1_choice1_id = actions_system.choice(game_id, move1_id, Choice::OneRed(()), 70);
+        let move1_id = actions_system.move(game_id, playerB, Choice::OneRed(()), 70);
+        let m1_choice1_id = 1;
         // playerA moves and chooses 
-        let move2_id = actions_system.move(game_id, playerA);
-        let choice2_id = actions_system.choice(game_id, move2_id, Choice::ThreeRed(()), 30);
+        let move2_id = actions_system.move(game_id, playerA, Choice::ThreeRed(()), 30);
+        let choice2_id = 1;
         // playerC moves and chooses 
-        let move3_id = actions_system.move(game_id, playerC);
-        let choice3_id = actions_system.choice(game_id, move3_id, Choice::ThirtyFiveRed(()), 20);
+        let move3_id = actions_system.move(game_id, playerC, Choice::ThirtyFiveRed(()), 20);
+        let choice3_id = 1;
         // playerB chooses again
         let m1_choice2_id = actions_system.choice(game_id, move1_id, Choice::Odd(()), 50);
 
@@ -188,17 +184,17 @@ mod actions_test {
         let playerD = contract_address_const::<0x4>();
 
         // playerA moves and chooses
-        let moveA_id = actions_system.move(game_id, playerA);
-        let choiceA_id = actions_system.choice(game_id, moveA_id, Choice::OneRed(()), 70);
+        let moveA_id = actions_system.move(game_id, playerA, Choice::OneRed(()), 70);
+        let choiceA_id = 1;
         // playerB moves and chooses
-        let moveB_id = actions_system.move(game_id, playerB);
-        let choiceB_id = actions_system.choice(game_id, moveB_id, Choice::TwoBlack(()), 20);
+        let moveB_id = actions_system.move(game_id, playerB, Choice::TwoBlack(()), 20);
+        let choiceB_id = 1;
         // playerC moves and chooses
-        let moveC_id = actions_system.move(game_id, playerC);
-        let choiceC_id = actions_system.choice(game_id, moveC_id, Choice::EighteenBlack(()), 30);
+        let moveC_id = actions_system.move(game_id, playerC, Choice::EighteenBlack(()), 30);
+        let choiceC_id = 1;
         // playerD moves and chooses
-        let moveD_id = actions_system.move(game_id, playerD);
-        let choiceD_id = actions_system.choice(game_id, moveD_id, Choice::OneToTwelve(()), 40);
+        let moveD_id = actions_system.move(game_id, playerD, Choice::OneToTwelve(()), 40);
+        let choiceD_id = 1;
         // player A chooses again
         let choiceA_2_id = actions_system.choice(game_id, moveA_id, Choice::Even(()), 50);
         // player C chooses again
@@ -211,23 +207,16 @@ mod actions_test {
         let curr_game = get!(world, (game_id), Game);
         assert(curr_game.move_count == 4, 'Move count is wrong');
 
-        // check data of some random moves
+        // check data of some random move
+        // check playerA move
         let move1 = get!(world, (game_id, moveA_id), Move);
         assert(move1.player == playerA, 'Player is wrong');
         assert(move1.choice_count == 2, 'Choice count is wrong');
 
-        // assert(move1.choice.into() == 1, 'Choice is wrong');
-        // assert(move1.amount == 70, 'Amount is wrong');
-
-        // let move2 = get!(world, (game_id, 2), Move);
-        // assert(move2.player == playerB, 'Player is wrong');
-        // assert(move2.choice.into() == 2, 'Choice is wrong');
-        // assert(move2.amount == 20, 'Amount is wrong');
-
-        // let move3 = get!(world, (game_id, 3), Move);
-        // assert(move3.player == playerC, 'Player is wrong');
-        // assert(move3.choice.into() == 18, 'Choice is wrong');
-        // assert(move3.amount == 30, 'Amount is wrong');
+        // check playerA choice
+        let m1_choice1 = get!(world, (game_id, moveA_id, choiceA_id), PlayerChoice);
+        assert(m1_choice1.choice.into() == 1, 'Choice1 is wrong');
+        assert(m1_choice1.amount == 70, 'Amount1 is wrong');
 
         // set winner
         actions_system.set_winner(game_id, 7);
@@ -237,7 +226,7 @@ mod actions_test {
         // 40*3=120
         assert(curr_game.last_total_paid == 120, 'Total paid is wrong');
 
-     }
+      }
      
     // #[test]
     // #[available_gas(30000000)]

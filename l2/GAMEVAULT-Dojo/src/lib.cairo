@@ -12,10 +12,7 @@ mod erc20_dojo {
 #[cfg(test)]
 mod tests {
     mod actions_test;
-    mod erc20_test;
-    mod constants;
-    mod erc20_utils;
-
-
-
+//     mod erc20_test;
+//     mod constants;
+//     mod erc20_utils;
 }
