@@ -1,6 +1,8 @@
 use l2::the_marquis::models::{Move, Choice};
 use starknet::ContractAddress;
 
+const MAX_AMOUNT_MOVES: u32 = 10000;
+
 fn make_move(game_id: u32, move_id: u32, player: ContractAddress, choice: Choice, amount: u32) -> Move {
     Move {
         game_id,
@@ -11,7 +13,7 @@ fn make_move(game_id: u32, move_id: u32, player: ContractAddress, choice: Choice
     }
 }
 
-        fn is_winning_move(
+fn is_winning_move(
             choice: Choice, 
             winning_number: u8
    ) -> bool {

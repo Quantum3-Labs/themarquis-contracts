@@ -1,11 +1,12 @@
 use starknet::ContractAddress;
 use l2::the_marquis::models::{Choice};
+use array::{ArrayTrait, SpanTrait};
 
 // define the interface
 #[starknet::interface]
 trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
-    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32);
+    fn move(self: @TContractState, game_id: u32, player_address: ContractAddress, choices: Array<Choice>, amounts: Array<u32>);
     fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
  }
 
@@ -14,7 +15,7 @@ trait IActions<TContractState> {
 mod actions {
     use starknet::{ContractAddress, get_caller_address};
     use l2::the_marquis::models::{Game, Choice, Move};
-    use l2::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move};
+    use l2::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
     use super::IActions;
 
     // declaring custom event struct
@@ -53,23 +54,18 @@ mod actions {
         }
 
         // Implementation of the move function for the ContractState struct.
-        fn move(self: @ContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) {
-            // Access the world dispatcher for reading.
-            let world = self.world_dispatcher.read();
+        fn move(self: @ContractState, game_id: u32, player_address: ContractAddress, choices: Array<Choice>, amounts: Array<u32>) {
 
-            let MAX_AMOUNT_MOVES = 100;
-            let mut curr_game = get!(world, game_id, Game);
-            assert(curr_game.move_count <= MAX_AMOUNT_MOVES, 'Moves limit reached');
-            assert(choice.into() != 48, 'Choice cannot be empty move');
-            assert(amount > 0, 'Amount cannot be zero');
-
-            // create new move
-            let move_id = curr_game.move_count +1;
-            let new_move = make_move(game_id, move_id, player_address, choice, amount);
-
-            // update move count
-            curr_game.move_count = move_id;
-            set!(world, (curr_game, new_move));
+            // there are 48 choices at most
+            assert(choices.len() > 0 && choices.len() <= 48 && choices.len() == amounts.len(), 'arrays length not match');
+            let mut index = 0;
+            loop {
+                if index == choices.len() {
+                    break;
+                }
+                self.move_internal(game_id, player_address, (*choices[index]).try_into().unwrap(), (*amounts[index]).try_into().unwrap());
+                index = index + 1;
+            }
         }
 
         fn set_winner(self: @ContractState, game_id: u32, winning_number: u8) {
@@ -103,6 +99,27 @@ mod actions {
             curr_game.last_total_paid = aggregate_amount;
             curr_game.move_count = 0;
             set!(world, (curr_game));
+        }
+    }
+
+    #[generate_trait]
+    impl InternalImpl of InternalTrait {
+        fn move_internal(self: @ContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) {
+            // Access the world dispatcher for reading.
+            let world = self.world_dispatcher.read();
+
+            let mut curr_game = get!(world, game_id, Game);
+            assert(curr_game.move_count <= MAX_AMOUNT_MOVES, 'Moves limit reached');
+            assert(choice.into() != 48, 'Choice not allowed');
+            assert(amount > 0, 'Amount cannot be zero');
+
+            // create new move
+            let move_id = curr_game.move_count +1;
+            let new_move = make_move(game_id, move_id, player_address, choice, amount);
+
+            // update move count
+            curr_game.move_count = move_id;
+            set!(world, (curr_game, new_move));
         }
     }
 }
