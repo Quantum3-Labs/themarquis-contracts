@@ -8,7 +8,7 @@ trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
     fn move(self: @TContractState, game_id: u32, player: ContractAddress, choice: Choice, amount: u32);
     fn choice(self: @TContractState, game_id: u32, move_id: ContractAddress, choice: Choice, amount: u32) -> u32;
-    fn check_player_win(self: @TContractState, game_id: u32, player: ContractAddress, winning_number: u8) -> u32;
+    fn check_winners(self: @TContractState, game_id: u32, players: Span<ContractAddress>, winning_number: u8) -> Span<u32>;
  }
 
 // dojo decorator
@@ -92,37 +92,50 @@ mod actions {
             new_choice_id
         }
 
-        fn check_player_win(self: @ContractState, game_id: u32, player: ContractAddress, winning_number: u8) -> u32{
+        fn check_winners(self: @ContractState, game_id: u32, players: Span<ContractAddress>, winning_number: u8)-> Span<u32>{
+            assert(players.len() > 0, 'Players cannot be empty');
             let world = self.world_dispatcher.read();
             let mut game = get!(world, game_id, Game);
-            let curr_move = get!(world, (game_id, player), Move);
-            // get number of choices for current move
-            let choice_count = curr_move.choice_count;
-            let mut curr_choice_counter = 1;
-            let mut earning_amount = 0;
-            // iterate over choices
+            let mut index = 0;
+            let mut earning_amounts:Array<u32> = array![];
+
             loop {
-                if curr_choice_counter > choice_count {
+                if index >= players.len() {
                     break;
                 }
-                let curr_choice = get!(world, (game_id, player, curr_choice_counter), PlayerChoice);
-                // check if player choice is winning
-                let is_choice_winning = is_winning_move(curr_choice.choice, winning_number);
-                if is_choice_winning {
-                    let player_earned_amount = curr_choice.amount * get_multiplier(curr_choice.choice);
-                    // accumulate amount per player
-                    earning_amount = earning_amount + player_earned_amount
+                let curr_player_addr:ContractAddress = *players[index];
+                let curr_move = get!(world, (game_id, curr_player_addr), Move);
+                // get number of choices for current move
+                let choice_count = curr_move.choice_count;
+                let mut curr_choice_counter = 1;
+                let mut player_earning_amount:u32 = 0;
+                // iterate over choices
+                loop {
+                    if curr_choice_counter > choice_count {
+                        break;
+                    }
+                    let curr_choice = get!(world, (game_id, curr_player_addr, curr_choice_counter), PlayerChoice);
+                    // check if player choice is winning
+                    let is_choice_winning = is_winning_move(curr_choice.choice, winning_number);
+                    if is_choice_winning {
+                        let player_earned_amount = curr_choice.amount * get_multiplier(curr_choice.choice);
+                        // accumulate amount per player
+                        player_earning_amount = player_earning_amount + player_earned_amount
+                    }
+                    curr_choice_counter = curr_choice_counter + 1;
+                };
+                if player_earning_amount > 0 {
+                    // transfer total amount earned
+                    // erc20.transfer(player, player_earning_amount);
                 }
-                curr_choice_counter = curr_choice_counter + 1;
+                earning_amounts.append(player_earning_amount);
+                index = index + 1; 
+
             };
-            if earning_amount > 0 {
-                // transfer total amount earned
-                // erc20.transfer(player, earning_amount);
-            }
-            game.move_count = game.move_count - 1;
+            game.move_count = 0;
             //update game state
             set!(world, (game));
-            earning_amount
+            earning_amounts.span()
         }
 
             //    fn interact_with_erc20(name: felt252, symbol: felt252) {

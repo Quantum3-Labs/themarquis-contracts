@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod actions_test {
     use debug::PrintTrait;
+    use core::array::ArrayTrait;
 
     use starknet::{class_hash::Felt252TryIntoClassHash,contract_address_const};
 
@@ -169,17 +170,25 @@ mod actions_test {
         // check winners
         let fixed_winning_number = 1;
 
-        let pA_earned_amount = actions_system.check_player_win(game_id, playerA, fixed_winning_number);
-        let pB_earned_amount = actions_system.check_player_win(game_id, playerB, fixed_winning_number);
-        let pC_earned_amount = actions_system.check_player_win(game_id, playerC, fixed_winning_number);
+        let mut players = array![playerA, playerB, playerC];
+
+        let earned_amounts = actions_system.check_winners(game_id, players.span(), fixed_winning_number);
+        
 
         // check total paid in this game
         let curr_game = get!(world, (game_id), Game); 
         
         // 31 * 70 + 50 * 2 = 2270
-        assert(pA_earned_amount == 0, 'Total earned amount is wrong');
-        assert(pB_earned_amount == 2270, 'Total earned amount is wrong');
-        assert(pC_earned_amount == 0, 'Total earned amount is wrong');
+        let expected_amounts = array![0, 2270, 0];
+        let lenght = earned_amounts.len();
+        let mut index = 0;
+        loop {
+            assert(earned_amounts[index] == expected_amounts[index], 'Total earned amount is wrong');
+            index += 1;
+            if index == lenght {
+                break;
+            }
+        };
 
         // play again -- WE DONT NEED SPAWN AGAIN
 
@@ -224,21 +233,24 @@ mod actions_test {
         assert(m1_choice1.choice.into() == 7, 'Choice1 is wrong');
         assert(m1_choice1.amount == 70, 'Amount1 is wrong');
 
+        players.append(playerD);
+
         // set winner
-        let pA_earned_amount = actions_system.check_player_win(game_id, playerA, 7);
-        let pB_earned_amount = actions_system.check_player_win(game_id, playerB, 7);
-        let pC_earned_amount = actions_system.check_player_win(game_id, playerC, 7);
-        let pD_earned_amount = actions_system.check_player_win(game_id, playerD, 7);
+        let earned_amount2 = actions_system.check_winners(game_id, players.span(), 7);
 
         // check total paid in this game
         let curr_game = get!(world, (game_id), Game);
-        // 31 * 70 = 2170
-        assert(pA_earned_amount == 2170, 'Total earned amount is wrong');
-        assert(pB_earned_amount == 0, 'Total earned amount is wrong');
-        assert(pC_earned_amount == 0, 'Total earned amount is wrong');
-        // 40 * 3 = 120
-        assert(pD_earned_amount == 120, 'Total earned amount is wrong');
-
+        // 31 * 70 = 2170, 40 * 3 = 120
+        let expected_amounts2 = array![2170, 0, 0,120];
+        let lenght = earned_amount2.len();
+        let mut index = 0;
+        loop {
+            assert(earned_amount2[index] == expected_amounts2[index], 'Total earned amount is wrong');
+            index += 1;
+            if index == lenght {
+                break;
+            }
+        };
        }
      
     // #[test]
