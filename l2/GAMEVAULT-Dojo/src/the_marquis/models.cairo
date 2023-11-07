@@ -13,8 +13,7 @@ struct Move {
     #[key]
     game_id: u32,
     #[key]
-    move_id: u32,
-    player: ContractAddress,
+    move_id: ContractAddress, // move_id == player_address
     choice_count: u32,
 }
 #[derive(Model, Drop, Serde)]
@@ -22,9 +21,9 @@ struct PlayerChoice {
     #[key]
     game_id: u32,
     #[key]
-    move_id: u32,
+    move_id: ContractAddress, // move_id == player_address
     #[key]
-    choice_id: u32,
+    choice_id: u32, // index: 1..choice_count
     choice: Choice,
     amount: u32,
 }

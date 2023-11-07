@@ -1,11 +1,10 @@
 use l2::the_marquis::models::{Move, PlayerChoice, Choice};
 use starknet::ContractAddress;
 
-fn make_move_and_choose(game_id: u32, move_id: u32, player: ContractAddress, choice: Choice, amount: u32) -> (Move, PlayerChoice){
+fn make_move_and_choose(game_id: u32, move_id:ContractAddress, choice: Choice, amount: u32) -> (Move, PlayerChoice){
     let new_move = Move {
         game_id,
         move_id,
-        player,
         choice_count: 1,
     };
     let new_choice = PlayerChoice {
@@ -17,7 +16,7 @@ fn make_move_and_choose(game_id: u32, move_id: u32, player: ContractAddress, cho
     };
     (new_move, new_choice)
 }
-fn make_choice(game_id: u32, move_id: u32, choice_id: u32, choice: Choice, amount: u32) -> PlayerChoice{
+fn make_choice(game_id: u32, move_id: ContractAddress, choice_id: u32, choice: Choice, amount: u32) -> PlayerChoice{
     PlayerChoice {
         game_id,
         move_id,
