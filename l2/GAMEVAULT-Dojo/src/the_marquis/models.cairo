@@ -19,6 +19,13 @@ struct Move {
     amount: u32,
 }
 
+#[derive(Model, Drop, Serde)]
+struct WorldHelperStorage {
+    #[key]
+    world: ContractAddress,
+    owner: ContractAddress,
+    usd_m_address: ContractAddress
+}
 
 #[derive(Serde, Drop, Copy, PartialEq, Introspect)]
 enum Choice {
