@@ -37,23 +37,20 @@ mod actions_test {
     #[test]
     #[available_gas(30000000)]
     fn test_spawn() {
-        // players
-        let playerA = contract_address_const::<0x1>();
-        let playerB = contract_address_const::<0x2>();
         let (world, actions_system) = setup_world();
 
         // call spawn()
         let game_id = actions_system.spawn();
         let game = get!(world, game_id, (Game));
         assert(game.move_count == 0, 'move_count should be zero');
-        assert(game.last_total_paid == 0, 'Total paid should be zero');
+        //assert(game.last_total_paid == 0, 'Total paid should be zero');
     }
 
     #[test]
     #[available_gas(3000000000)]
     fn test_one_move_two_choices() {
         // set player address
-        let playerA = contract_address_const::<0x1>();
+        let playerA = contract_address_const::<0x11>();
 
         let (world, actions_system) = setup_world();
 
@@ -110,9 +107,9 @@ mod actions_test {
         let game_id = actions_system.spawn();
 
         // choose random number of players
-        let playerA = contract_address_const::<0x1>();
-        let playerB = contract_address_const::<0x2>();
-        let playerC = contract_address_const::<0x3>();
+        let playerA = contract_address_const::<0x11>();
+        let playerB = contract_address_const::<0x22>();
+        let playerC = contract_address_const::<0x33>();
 
         // set 3 moves and 4 choices
         // playerB moves and chooses 
@@ -169,22 +166,31 @@ mod actions_test {
         assert(m1_choice2.choice.into() == 47, 'Choice4 is wrong');
         assert(m1_choice2.amount == 50, 'Amount is wrong');
 
-        // set winner
+        // check winners
         let fixed_winning_number = 1;
-        actions_system.set_winner(game_id, fixed_winning_number);
+
+        let pA_earned_amount = actions_system.check_player_win(game_id, playerA, fixed_winning_number);
+        let pB_earned_amount = actions_system.check_player_win(game_id, playerB, fixed_winning_number);
+        let pC_earned_amount = actions_system.check_player_win(game_id, playerC, fixed_winning_number);
 
         // check total paid in this game
         let curr_game = get!(world, (game_id), Game); 
         
         // 31 * 70 + 50 * 2 = 2270
-        assert(curr_game.last_total_paid == 2270, 'Total paid is wrong');
+        assert(pA_earned_amount == 0, 'Total earned amount is wrong');
+        assert(pB_earned_amount == 2270, 'Total earned amount is wrong');
+        assert(pC_earned_amount == 0, 'Total earned amount is wrong');
 
         // play again -- WE DONT NEED SPAWN AGAIN
 
         let playerD = contract_address_const::<0x4>();
 
+        // test Game reset
+        let curr_game = get!(world, (game_id), Game);
+        assert(curr_game.move_count == 0, 'Move count is wrong');
+
         // playerA moves and chooses
-        actions_system.move(game_id, playerA, Choice::OneRed(()), 70);
+        actions_system.move(game_id, playerA, Choice::SevenRed(()), 70);
         let choiceA_id = 1;
         // playerB moves and chooses
         actions_system.move(game_id, playerB, Choice::TwoBlack(()), 20);
@@ -215,16 +221,23 @@ mod actions_test {
 
         // check playerA choice
         let m1_choice1 = get!(world, (game_id, playerA, choiceA_id), PlayerChoice);
-        assert(m1_choice1.choice.into() == 1, 'Choice1 is wrong');
+        assert(m1_choice1.choice.into() == 7, 'Choice1 is wrong');
         assert(m1_choice1.amount == 70, 'Amount1 is wrong');
 
         // set winner
-        actions_system.set_winner(game_id, 7);
+        let pA_earned_amount = actions_system.check_player_win(game_id, playerA, 7);
+        let pB_earned_amount = actions_system.check_player_win(game_id, playerB, 7);
+        let pC_earned_amount = actions_system.check_player_win(game_id, playerC, 7);
+        let pD_earned_amount = actions_system.check_player_win(game_id, playerD, 7);
 
         // check total paid in this game
         let curr_game = get!(world, (game_id), Game);
-        // 40*3=120
-        assert(curr_game.last_total_paid == 120, 'Total paid is wrong');
+        // 31 * 70 = 2170
+        assert(pA_earned_amount == 2170, 'Total earned amount is wrong');
+        assert(pB_earned_amount == 0, 'Total earned amount is wrong');
+        assert(pC_earned_amount == 0, 'Total earned amount is wrong');
+        // 40 * 3 = 120
+        assert(pD_earned_amount == 120, 'Total earned amount is wrong');
 
        }
      

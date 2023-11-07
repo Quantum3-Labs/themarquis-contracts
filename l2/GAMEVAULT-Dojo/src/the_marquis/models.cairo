@@ -6,7 +6,7 @@ struct Game {
     #[key]
     game_id: u32,
     move_count: u32,
-    last_total_paid: u32,
+    //last_total_paid: u32,
 }
 #[derive(Model, Drop, Serde)]
 struct Move {

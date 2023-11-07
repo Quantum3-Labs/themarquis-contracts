@@ -8,7 +8,7 @@ trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
     fn move(self: @TContractState, game_id: u32, player: ContractAddress, choice: Choice, amount: u32);
     fn choice(self: @TContractState, game_id: u32, move_id: ContractAddress, choice: Choice, amount: u32) -> u32;
-    fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
+    fn check_player_win(self: @TContractState, game_id: u32, player: ContractAddress, winning_number: u8) -> u32;
  }
 
 // dojo decorator
@@ -49,7 +49,7 @@ mod actions {
                 world,
                 (
                     Game {
-                        game_id, move_count:0, last_total_paid:0
+                        game_id, move_count:0
                     },
                     Move {
                         game_id, move_id:player_address, choice_count: 0
@@ -92,46 +92,37 @@ mod actions {
             new_choice_id
         }
 
-        fn set_winner(self: @ContractState, game_id: u32, winning_number: u8) {
+        fn check_player_win(self: @ContractState, game_id: u32, player: ContractAddress, winning_number: u8) -> u32{
             let world = self.world_dispatcher.read();
             let mut game = get!(world, game_id, Game);
-
-            // get number of moves  
-            let move_count = game.move_count;
-            let mut curr_move_counter = 1;
-            let mut aggregate_amount = 0;
-            // iterate over moves
+            let curr_move = get!(world, (game_id, player), Move);
+            // get number of choices for current move
+            let choice_count = curr_move.choice_count;
+            let mut curr_choice_counter = 1;
+            let mut earning_amount = 0;
+            // iterate over choices
             loop {
-                if curr_move_counter > move_count {
+                if curr_choice_counter > choice_count {
                     break;
                 }
-                let curr_move = get!(world, (game_id, curr_move_counter), Move);
-                // get number of choices for current move
-                let choice_count = curr_move.choice_count;
-                let mut curr_choice_counter = 1;
-                // iterate over choices
-                loop {
-                    if curr_choice_counter > choice_count {
-                        break;
-                    }
-                    let curr_choice = get!(world, (game_id, curr_move_counter, curr_choice_counter), PlayerChoice);
-                    // check if player choice is winning
-                    let is_choice_winning = is_winning_move(curr_choice.choice, winning_number);
-                    if is_choice_winning {
-                        let player_earned_amount = curr_choice.amount * get_multiplier(curr_choice.choice);
-                        // todo: transfer earned amount to player
-                        // erc20.transfer(curr_choice.player, player_earned_amount);
-                        aggregate_amount = aggregate_amount + player_earned_amount
-                    }
-                    curr_choice_counter = curr_choice_counter + 1;
-                };
-                //todo: accumulate amount for each player and transfer total amount earned
-                curr_move_counter = curr_move_counter + 1;
+                let curr_choice = get!(world, (game_id, player, curr_choice_counter), PlayerChoice);
+                // check if player choice is winning
+                let is_choice_winning = is_winning_move(curr_choice.choice, winning_number);
+                if is_choice_winning {
+                    let player_earned_amount = curr_choice.amount * get_multiplier(curr_choice.choice);
+                    // accumulate amount per player
+                    earning_amount = earning_amount + player_earned_amount
+                }
+                curr_choice_counter = curr_choice_counter + 1;
             };
-            // update game state
-            game.last_total_paid = aggregate_amount;
-            game.move_count = 0;
+            if earning_amount > 0 {
+                // transfer total amount earned
+                // erc20.transfer(player, earning_amount);
+            }
+            game.move_count = game.move_count - 1;
+            //update game state
             set!(world, (game));
+            earning_amount
         }
 
             //    fn interact_with_erc20(name: felt252, symbol: felt252) {
