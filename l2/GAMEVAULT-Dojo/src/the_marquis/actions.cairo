@@ -6,7 +6,7 @@ use array::{ArrayTrait, SpanTrait};
 #[starknet::interface]
 trait IActions<TContractState> {
     fn spawn(self: @TContractState) -> u32;
-    fn move(self: @TContractState, game_id: u32, choices: Array<Choice>, amounts: Array<u32>);
+    fn move(self: @TContractState, game_id: u32, choices: Span<Choice>, amounts: Span<u32>);
     fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
     fn owner(self: @TContractState) -> ContractAddress;
     fn initialize(self: @TContractState, usd_m_address: ContractAddress);
@@ -71,7 +71,7 @@ mod actions {
         }
 
         // Implementation of the move function for the ContractState struct.
-        fn move(self: @ContractState, game_id: u32, choices: Array<Choice>, amounts: Array<u32>) {
+        fn move(self: @ContractState, game_id: u32, choices: Span<Choice>, amounts: Span<u32>) {
             
             let player_address = get_caller_address();
             // there are 48 choices at most
