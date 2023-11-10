@@ -3,7 +3,7 @@ mod actions_test {
     use debug::PrintTrait;
     use serde::Serde;
     use starknet::SyscallResultTrait;
-    use starknet::{class_hash::Felt252TryIntoClassHash,contract_address_const, get_contract_address, ContractAddress};
+    use starknet::{class_hash::Felt252TryIntoClassHash,contract_address_const, get_contract_address, get_caller_address, ContractAddress};
 
     // import world dispatcher
     use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
@@ -50,7 +50,7 @@ mod actions_test {
         actions_system.initialize(erc20_address);
 
         // mint tokens to actions contract
-        erc20_system.mint_(contract_address, 100000);
+        // erc20_system.mint_(contract_address, 100000);
 
         // mint tokens to this contract
         erc20_system.mint_(get_contract_address(), 100000);
@@ -64,9 +64,9 @@ mod actions_test {
     #[available_gas(300000000000)]
     fn test_many_moves_and_win() {
         // set player address
-        let playerA = contract_address_const::<0x1>();
-        let playerB = contract_address_const::<0x2>();
-        let playerC = contract_address_const::<0x3>();
+        let playerA = contract_address_const::<0x111>();
+        let playerB = contract_address_const::<0x222>();
+        let playerC = contract_address_const::<0x333>();
 
         let (world, actions_system, erc20_system) = setup_world();
 
