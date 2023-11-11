@@ -27,7 +27,8 @@ mod actions {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Moved: Moved,
-        GameInitialized: GameInitialized
+        GameInitialized: GameInitialized,
+        PlayerMoved: PlayerMoved
     }
 
     // declaring custom event struct
@@ -43,6 +44,17 @@ mod actions {
     struct GameInitialized {
         #[key]
         game_id: u32
+    }
+
+    // declaring custom event struct
+    #[derive(Drop, starknet::Event)]
+    struct PlayerMoved {
+        #[key]
+        player_address: ContractAddress, 
+        #[key]
+        choice: Choice, 
+        #[key]
+        amount: u32
     }
 
     // impl: implement functions specified in trait
@@ -162,6 +174,8 @@ mod actions {
             // update move count
             curr_game.move_count = move_id;
             set!(world, (curr_game, new_move));
+            emit!(world, PlayerMoved { player_address, choice, amount});
+
         }
 
         fn _only_owner(self: @ContractState) {
