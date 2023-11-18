@@ -3,7 +3,10 @@ mod actions_test {
     use debug::PrintTrait;
     use serde::Serde;
     use starknet::SyscallResultTrait;
-    use starknet::{class_hash::Felt252TryIntoClassHash,contract_address_const, get_contract_address, get_caller_address, ContractAddress};
+    use starknet::{
+        class_hash::Felt252TryIntoClassHash, contract_address_const, get_contract_address,
+        get_caller_address, ContractAddress
+    };
 
     // import world dispatcher
     use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
@@ -26,7 +29,14 @@ mod actions_test {
     // reusable function for tests
     fn setup_world() -> (IWorldDispatcher, IActionsDispatcher, IERC20Dispatcher) {
         // models
-        let models = array![erc_20_allowance::TEST_CLASS_HASH, erc_20_balance::TEST_CLASS_HASH, erc_20_meta::TEST_CLASS_HASH, game::TEST_CLASS_HASH, move::TEST_CLASS_HASH, world_helper_storage::TEST_CLASS_HASH];
+        let models = array![
+            erc_20_allowance::TEST_CLASS_HASH,
+            erc_20_balance::TEST_CLASS_HASH,
+            erc_20_meta::TEST_CLASS_HASH,
+            game::TEST_CLASS_HASH,
+            move::TEST_CLASS_HASH,
+            world_helper_storage::TEST_CLASS_HASH
+        ];
         // deploy world with models
         let world = spawn_test_world(models);
         starknet::testing::set_contract_address(world.executor());
@@ -37,7 +47,8 @@ mod actions_test {
         let actions_system = IActionsDispatcher { contract_address };
 
         // deploy erc20 contract
-        let erc20_address = world.deploy_contract('salt', erc_systems::TEST_CLASS_HASH.try_into().unwrap());
+        let erc20_address = world
+            .deploy_contract('salt', erc_systems::TEST_CLASS_HASH.try_into().unwrap());
         let erc20_system = IERC20Dispatcher { contract_address: erc20_address };
 
         // initialize ERC20
@@ -86,20 +97,14 @@ mod actions_test {
 
         // create array of choices for playerB
         let playerB_choice_array = array![
-            Choice::TwoBlack(()),
-            Choice::FourBlack(()),
-            Choice::Even(()),
-            Choice::OneToTwelve(()),
+            Choice::TwoBlack(()), Choice::FourBlack(()), Choice::Even(()), Choice::OneToTwelve(()),
         ];
 
         // create array of amounts for playerB
         let playerB_amount_array: Array<u32> = array![50, 60, 70, 80];
 
         // create array of choices for playerC
-        let playerC_choice_array = array![
-            Choice::Odd(()),
-            Choice::OneToEighteen(()),
-        ];
+        let playerC_choice_array = array![Choice::Odd(()), Choice::OneToEighteen(()),];
 
         // create array of amounts for playerC
         let playerC_amount_array: Array<u32> = array![20, 30];
@@ -127,9 +132,8 @@ mod actions_test {
 
         // 60 + 240 + 100
         assert(curr_game.last_total_paid == 400, 'Total paid is wrong');
-
-     }
-    fn _approve(_token_address : ContractAddress, _to: ContractAddress, _amount: u32) -> bool{
+    }
+    fn _approve(_token_address: ContractAddress, _to: ContractAddress, _amount: u32) -> bool {
         let mut call_data: Array<felt252> = ArrayTrait::new();
         Serde::serialize(@_to, ref call_data);
         Serde::serialize(@_amount, ref call_data);
@@ -140,7 +144,7 @@ mod actions_test {
             .unwrap_syscall();
         Serde::<bool>::deserialize(ref res).unwrap()
     }
-    fn _mint(_token_address : ContractAddress, _to: ContractAddress, _amount: u32) -> bool{
+    fn _mint(_token_address: ContractAddress, _to: ContractAddress, _amount: u32) -> bool {
         let mut call_data: Array<felt252> = ArrayTrait::new();
         Serde::serialize(@_to, ref call_data);
         Serde::serialize(@_amount, ref call_data);
@@ -151,7 +155,9 @@ mod actions_test {
             .unwrap_syscall();
         Serde::<bool>::deserialize(ref res).unwrap()
     }
-    fn _initalize(_token_address : ContractAddress, name: felt252, symbol: felt252, world: ContractAddress) -> bool{
+    fn _initalize(
+        _token_address: ContractAddress, name: felt252, symbol: felt252, world: ContractAddress
+    ) -> bool {
         let mut call_data: Array<felt252> = ArrayTrait::new();
         Serde::serialize(@name, ref call_data);
         Serde::serialize(@symbol, ref call_data);
