@@ -16,6 +16,7 @@ import {
   closeBets,
   masterAccount,
   printUSDmBalance,
+  hexToAscii,
 } from "./utils/utils.js";
 
 async function spinWheel() {
@@ -28,6 +29,8 @@ async function mainSetup() {
   await spawn();
   await mintUsdM(10000000 * 10 ** 3);
   await mintUsdM(1000000000 * 10 ** 3, theMarquisActionsAddress);
+  console.log("game id");
+  console.log(gameId);
 }
 
 mainSetup()
@@ -36,33 +39,33 @@ mainSetup()
   })
   .catch(console.error);
 
-async function initNewGame() {
-  printUSDmBalance(theMarquisActionsAddress).then();
-  // open bets
-  openBets().then();
+// async function initNewGame() {
+//   printUSDmBalance(theMarquisActionsAddress).then();
+//   // open bets
+//   openBets().then();
 
-  // perform subsequent bets
-  let leftTime = gameDuration;
-  while (leftTime > 0) {
-    const randomNumber = Math.floor(Math.random() * (leftTime / 20 - 2)) + 1500;
-    placeRandomBet().then();
-    if (randomNumber < leftTime) await sleep(randomNumber);
-    leftTime -= randomNumber;
-  }
+//   // perform subsequent bets
+//   let leftTime = gameDuration;
+//   while (leftTime > 0) {
+//     const randomNumber = Math.floor(Math.random() * (leftTime / 20 - 2)) + 1500;
+//     placeRandomBet().then();
+//     if (randomNumber < leftTime) await sleep(randomNumber);
+//     leftTime -= randomNumber;
+//   }
 
-  closeBets().then();
-  // wait for game to end
-  await sleep(-leftTime);
-  // spin the wheel
-  await sleep(waitForSpinTime);
-  spinWheel().then();
-  // wait for spinning
-  await sleep(spinningDuration);
+//   closeBets().then();
+//   // wait for game to end
+//   await sleep(-leftTime);
+//   // spin the wheel
+//   await sleep(waitForSpinTime);
+//   spinWheel().then();
+//   // wait for spinning
+//   await sleep(spinningDuration);
 
-  // set winner
-  setWinner().then(() => {
-    printUSDmBalance(theMarquisActionsAddress).then();
-  });
-}
+//   // set winner
+//   setWinner().then(() => {
+//     printUSDmBalance(theMarquisActionsAddress).then();
+//   });
+// }
 
-cron.schedule("*/2 * * * *", initNewGame);
+// cron.schedule("*/2 * * * *", initNewGame);

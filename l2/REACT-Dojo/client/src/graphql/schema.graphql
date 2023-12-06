@@ -5,15 +5,9 @@ query getEntities {
         keys
         models {
           __typename
-          ... on Moves {
-            remaining
-            last_direction
-          }
-          ... on Position {
-            vec {
-              x
-              y
-            }
+          ... on ERC20Balance {
+            account
+            amount
           }
         }
       }

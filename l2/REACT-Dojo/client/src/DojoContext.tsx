@@ -1,3 +1,4 @@
+"use client";
 import { BurnerProvider, useBurner } from "@dojoengine/create-burner";
 import { ReactNode, createContext, useContext, useMemo } from "react";
 import { Account, RpcProvider } from "starknet";
@@ -46,6 +47,8 @@ export const DojoProvider = ({ children, value }: DojoProviderProps) => {
     () => new Account(rpcProvider, masterAddress, privateKey),
     [rpcProvider, masterAddress, privateKey]
   );
+  console.log("debug master account");
+  console.log(masterAccount);
 
   return (
     <BurnerProvider

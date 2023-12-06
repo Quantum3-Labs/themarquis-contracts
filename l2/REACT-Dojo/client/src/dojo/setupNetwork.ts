@@ -1,6 +1,6 @@
 import { defineContractComponents } from "./contractComponents";
 import { world } from "./world";
-import { RPCProvider, Query } from "@dojoengine/core";
+import { RPCProvider, Query, getContractByName } from "@dojoengine/core";
 import { Account, num } from "starknet";
 import { GraphQLClient } from "graphql-request";
 import { getSdk } from "../generated/graphql";
@@ -19,6 +19,8 @@ export async function setupNetwork() {
     manifest,
     VITE_PUBLIC_NODE_URL
   );
+  console.log("debug");
+  console.log(getContractByName(manifest, "erc_systems"));
 
   // Return the setup object.
   return {

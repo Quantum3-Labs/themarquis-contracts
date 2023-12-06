@@ -55,6 +55,7 @@ const executeTransaction = async (
   if (receipt.execution_status !== "SUCCEEDED") {
     throw new Error(customError);
   }
+  console.log(receipt);
   return receipt;
 };
 
@@ -149,13 +150,21 @@ export const setWinner = async () => {
   await executeTransaction(
     theMarquisActionsAddress,
     "set_winner",
-    [gameId, randomNumber],
+    [gameId, 3],
     "Failed to set winner"
   );
-  console.log("winner number is", randomNumber);
+  console.log("winner number is", 3);
 };
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function hexToAscii(hex) {
+  var str = "";
+  for (var n = 2; n < hex.length; n += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+  }
+  return str;
 }
 
 export async function printUSDmBalance(account) {
