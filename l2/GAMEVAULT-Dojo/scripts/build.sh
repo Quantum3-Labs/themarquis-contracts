@@ -10,7 +10,7 @@ sozo build
 
 echo "Build successful."
 # Set the path to your manifest.json file
-manifest_file="target/dev/manifest.json"
+manifest_file="../target/dev/manifest.json"
 
 ## FIX PADDING
 
