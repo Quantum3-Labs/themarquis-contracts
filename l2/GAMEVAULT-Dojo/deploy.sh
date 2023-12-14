@@ -1,0 +1,1 @@
+sozo migrate --rpc-url $DOJO_GOERLI_RPC_URL
