@@ -89,12 +89,12 @@ mod actions {
             // there are 48 choices at most
             assert(choices.len() > 0 && choices.len() <= 48 && choices.len() == amounts.len(), 'arrays length not match');
             let mut index = 0;
-            let mut aggregated_amount = 0;
+            let mut aggregated_amount:u32 = 0;
             loop {
                 if index == choices.len() {
                     break;
                 }
-                let amount = (*amounts[index]).try_into().unwrap();
+                let amount:u32 = (*amounts[index]).try_into().unwrap();
                 self.move_internal(game_id, player_address, (*choices[index]).try_into().unwrap(), amount);
                 aggregated_amount = aggregated_amount + amount;
                 index = index + 1;
