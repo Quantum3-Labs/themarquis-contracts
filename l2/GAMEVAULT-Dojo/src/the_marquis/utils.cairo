@@ -1,4 +1,4 @@
-use l2_v1_0::the_marquis::models::{Move, Choice};
+use l2_v1_0_1::the_marquis::models::{Move, Choice};
 use starknet::ContractAddress;
 
 const MAX_AMOUNT_MOVES: u32 = 10000;

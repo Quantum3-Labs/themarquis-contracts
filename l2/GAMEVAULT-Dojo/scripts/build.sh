@@ -2,7 +2,7 @@
 
 ## REMOVE CACHE
 
-rm -rf target
+rm -rf ../target
 
 ## BUILD
 
@@ -27,3 +27,4 @@ cp "$manifest_file" "$manifest_file.bak"
 jq '.models |= map(.class_hash |= ("0x" + "0" * (64 - (. | length - 2)) + .[2:]))' "$manifest_file" > tmp_manifest.json && mv tmp_manifest.json "$manifest_file"
 
 echo "Replacement complete. Backup created at $manifest_file.bak"
+

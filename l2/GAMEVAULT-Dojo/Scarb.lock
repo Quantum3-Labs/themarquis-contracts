@@ -11,10 +11,10 @@ dependencies = [
 
 [[package]]
 name = "dojo_plugin"
-version = "0.3.11"
+version = "0.3.10"
 
 [[package]]
-name = "l2_v1_0"
+name = "l2_v1_0_1"
 version = "0.3.10"
 dependencies = [
  "dojo",
