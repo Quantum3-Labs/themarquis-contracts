@@ -1,5 +1,5 @@
 use starknet::ContractAddress;
-use l2_v1_0_1::the_marquis::models::{Choice};
+use l2_v2_0::the_marquis::models::{Choice};
 use array::{ArrayTrait, SpanTrait};
 
 // define the interface
@@ -18,8 +18,8 @@ mod actions {
     use serde::Serde;
     use starknet::SyscallResultTrait;
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
-    use l2_v1_0_1::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
-    use l2_v1_0_1::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
+    use l2_v2_0::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
+    use l2_v2_0::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
     use super::IActions;
 
     // declaring custom event struct
