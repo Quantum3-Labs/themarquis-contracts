@@ -29,14 +29,14 @@ echo -e '\n✨ Setup completed ✨'
 
 # ## MINT
 echo -e '\n✨ Mint USD Marquis ✨'
-starkli invoke 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e mint_ 0x031be432d79a570ccf17288e5aca2ac3884c4dc0558df1f455a7df3aa820147f 1000000000000000000000 0 --keystore-password $PASSWORD --watch
+starkli invoke $USD_M_TOKEN_ADDRESS mint_ 0x031be432d79a570ccf17288e5aca2ac3884c4dc0558df1f455a7df3aa820147f 1000000000000000000000 0 --keystore-password $PASSWORD --watch
 
 
 # ## APPROVE AND BET
 echo -e '\n✨ Approve and Bet ✨'
-starkli invoke 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e approve 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea 100000000000000000000 0 --keystore-password $PASSWORD --watch
+starkli invoke $USD_M_TOKEN_ADDRESS approve $THE_MARQUIS_ACTIONS_ADDRESS 1000000000000000000000 0 --keystore-password $PASSWORD --watch
 
-starkli invoke 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea move 0 2 4 30 2 1000000000000000000 5000000000000000000 --keystore-password $PASSWORD  --watch
+starkli invoke $THE_MARQUIS_ACTIONS_ADDRESS move 0 2 4 30 2 1000000 5000000 --keystore-password $PASSWORD  --watch
 
 # ## WINNER
 
