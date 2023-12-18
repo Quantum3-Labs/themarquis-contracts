@@ -25,14 +25,21 @@ starkli invoke $USD_M_TOKEN_ADDRESS initialize 0x557364204d617271756973 0x557364
 echo -e '\n✨ Spawn first game✨'
 starkli invoke $THE_MARQUIS_ACTIONS_ADDRESS spawn --keystore-password $PASSWORD --watch
 
-
-# starkli invoke 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e mint_ 0x031be432d79a570ccf17288e5aca2ac3884c4dc0558df1f455a7df3aa820147f 1000000000000000000000 0 --keystore-password $PASSWORD
-# sleep 10
+echo -e '\n✨ Setup completed ✨'
 
 # ## MINT
-# echo -e '\n✨ Approve and Bet ✨'
-# starkli invoke 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e approve 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea 100000000000000000000 0 --keystore-password $PASSWORD
-# sleep 10
-# starkli invoke 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea move 1 2 20 30 2 2 3 --keystore-password $PASSWORD
+echo -e '\n✨ Mint USD Marquis ✨'
+starkli invoke 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e mint_ 0x031be432d79a570ccf17288e5aca2ac3884c4dc0558df1f455a7df3aa820147f 1000000000000000000000 0 --keystore-password $PASSWORD --watch
 
-echo -e '\n✨ Setup completed ✨'
+
+# ## APPROVE AND BET
+echo -e '\n✨ Approve and Bet ✨'
+starkli invoke 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e approve 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea 100000000000000000000 0 --keystore-password $PASSWORD --watch
+
+starkli invoke 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea move 0 2 4 30 2 1000000000000000000 5000000000000000000 --keystore-password $PASSWORD  --watch
+
+# ## WINNER
+
+echo -e '\n✨ Winner the Roulette ✨'
+
+starkli invoke $THE_MARQUIS_ACTIONS_ADDRESS set_winner 0 3 --keystore-password $PASSWORD --watch
