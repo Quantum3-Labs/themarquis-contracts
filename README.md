@@ -7,9 +7,7 @@
   </h1>
 
 <a href="https://github.com/Quantum3-Labs/TheMarquis-contracts">
-<img src="https://img.shields.io/badge/Overview The Marquis Contracts-red"
-/>
-
+<img src="https://img.shields.io/badge/Overview-The%20Marquis%20Contracts-red"/>
 </a>
 <a href="">
 <img src="https://img.shields.io/twitter/follow/TheMarquis?style=social"/>
@@ -17,7 +15,8 @@
 
 </div>
 
-**Test Single Deploy en Goerli**
+### Single Deploy on Goerli
+To execute all actions including the Dojo installation, run the following commands:
 
 ```bash
 dojoup -v 0.3.11
@@ -25,7 +24,51 @@ cd TheMarquis-contracts/l2/GAMEVAULT-Dojo/scripts
 bash build.sh
 bash deploy.sh
 bash setup.sh
+bash mint.sh
+bash bet.sh
+bash winner.sh
 ```
+
+### Individual Actions
+To perform specific actions, execute the following commands:
+
+- **Build Project:**
+    ```bash
+    bash build.sh
+    ```
+    This command compiles the project and generates the manifest file.
+
+- **Deploy Project on Goerli:**
+    ```bash
+    bash deploy.sh
+    ```
+    Deploys the project on the Goerli network.
+
+- **Initial Setup:**
+    ```bash
+    bash setup.sh
+    ```
+    Sets up contracts and necessary addresses for initializing the project and the game type.
+
+- **Token Minting:**
+    ```bash
+    bash mint.sh
+    ```
+    Mint USD Marquis tokens for placing bets.
+
+- **Placing Bets:**
+    ```bash
+    bash bet.sh
+    ```
+    Approves and places bets using USD Marquis.
+
+- **Winner Selection:**
+    ```bash
+    bash winner.sh
+    ```
+    Selects the winner in the roulette game.
+
+### Relevant Contracts on Goerli:
 
 - [World Marquis](https://goerli.voyager.online/contract/0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3) - 0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3
 - [Actions Marquis](https://goerli.voyager.online/contract/0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea) - 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea
