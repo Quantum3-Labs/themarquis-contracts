@@ -74,3 +74,8 @@ To perform specific actions, execute the following commands:
 - [Actions Marquis](https://goerli.voyager.online/contract/0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea) - 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea
 - [Token USD Marquis](https://goerli.voyager.online/contract/0x0116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e) - 0x0116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e
 
+### Relevant Contracts on Sepolia:
+
+- - [World Marquis](https://sepolia.voyager.online/contract/0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3) - 0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3
+- [Actions Marquis](https://sepolia.voyager.online/contract/0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea) - 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea
+- [Token USD Marquis](https://sepolia.voyager.online/contract/0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e) - 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e
