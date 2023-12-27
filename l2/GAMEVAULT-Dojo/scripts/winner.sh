@@ -1,7 +1,7 @@
 #!/bin/bash
 source .env
 
-THE_MARQUIS_ACTIONS_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "actions" ).address')
+THE_MARQUIS_ACTIONS_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v3_0::the_marquis::actions::actions" ).address')
 
 echo -e "THE_MARQUIS_ACTIONS_ADDRESS: $THE_MARQUIS_ACTIONS_ADDRESS"
 

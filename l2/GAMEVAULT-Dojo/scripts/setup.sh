@@ -2,8 +2,8 @@
 source .env
 
 WORLD_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.world.address')
-THE_MARQUIS_ACTIONS_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "actions" ).address')
-USD_M_TOKEN_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "erc_systems" ).address')
+THE_MARQUIS_ACTIONS_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v3_0::the_marquis::actions::actions" ).address')
+USD_M_TOKEN_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v3_0::erc20_dojo::erc20::erc_systems" ).address')
 
 echo -e '\n✨ Performing setup for the following : ✨'
 echo -e "WORLD_ADDRESS: $WORLD_ADDRESS"

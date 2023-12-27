@@ -1,7 +1,7 @@
 #!/bin/bash
 source .env
 
-USD_M_TOKEN_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "erc_systems" ).address')
+USD_M_TOKEN_ADDRESS=$(cat ../target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v3_0::erc20_dojo::erc20::erc_systems" ).address')
 
 echo -e "USD_M_TOKEN_ADDRESS: $USD_M_TOKEN_ADDRESS"
 

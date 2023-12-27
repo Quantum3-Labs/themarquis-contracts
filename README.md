@@ -19,7 +19,7 @@
 To execute all actions including the Dojo installation, run the following commands:
 
 ```bash
-dojoup -v 0.3.11
+dojoup -v 0.4.2
 cd TheMarquis-contracts/l2/GAMEVAULT-Dojo/scripts
 bash build.sh
 bash deploy.sh
@@ -76,6 +76,12 @@ To perform specific actions, execute the following commands:
 
 ### Relevant Contracts on Sepolia:
 
-- - [World Marquis](https://sepolia.voyager.online/contract/0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3) - 0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3
+- [World Marquis](https://sepolia.voyager.online/contract/0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3) - 0x7f9b2fd8cc27b20cb988be7fb7ae55459a6dddb0e1143ac1532b8b63e0463d3
 - [Actions Marquis](https://sepolia.voyager.online/contract/0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea) - 0x21542c4f3ba51dbe3702e7d42064f73595196904ee32baa93cb871b2b1e11ea
 - [Token USD Marquis](https://sepolia.voyager.online/contract/0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e) - 0x116d30283b84b826382d0115a985f71cdefd0dc7411c72dad1c0bbc9a292f5e
+
+### Relevant Contracts on Sepolia V Dojo 4.2
+
+- [World Marquis](https://sepolia.voyager.online/contract/0x2a36d89354970024eecaa6709a91b847a1810caeb5bca5d04a2ef009e201e80) - 0x2a36d89354970024eecaa6709a91b847a1810caeb5bca5d04a2ef009e201e80
+- [Actions Marquis](https://sepolia.voyager.online/contract/0x365a607578bcb62edd3f950f4f9452b627027251a82ceff4611cb9ad4e93046) - 0x365a607578bcb62edd3f950f4f9452b627027251a82ceff4611cb9ad4e93046
+- [Token USD Marquis](https://sepolia.voyager.online/contract/0x5029eebf9ecbda709b6d295faaa5c0962403c9b3f564bdedda906d21d19c928) - 0x5029eebf9ecbda709b6d295faaa5c0962403c9b3f564bdedda906d21d19c928
