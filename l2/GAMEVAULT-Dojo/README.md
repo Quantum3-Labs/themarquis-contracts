@@ -39,34 +39,33 @@ cd /TheMarquis-contracts/l2/GAMEVAULT-Dojo && torii --world 0x5fdfd7cfccb3af0e8a
 5. **initialize erc_20**
 
 ```bash
-sozo execute 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108 initialize --calldata 123,123,0x6e31e6291f572cf76e11f1c99af8284f0d160f9f3af74e7e787a0f598bf0480
+sozo execute 0x1a2d94c3e453d9491121487e13414b105790f6f16e4da38bbe16d2163d7dcfd initialize --calldata 123,123,0x5fdfd7cfccb3af0e8ac3c0490dfb6034465debd839369fdc3a2d9dadc4f056
 ```
 
 6. **initialize actions**
 
-```bash
-sozo execute 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097 initialize --calldata 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108
+````bash
+sozo execute 0x4d8676f82bef652080f09e6734f2018c8fd024493fc134424dcaf7ebf0be0e initialize --calldata 0x1a2d94c3e453d9491121487e13414b105790f6f16e4da38bbe16d2163d7dcfd
 ```
 
 7. **mint m_usd**
 
 ```bash
-sozo execute 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108 mint_ --calldata 0x517ececd29116499f4a1b64b094da79ba08dfd54a3edaa316134c41f8160973,10000,0
-```
+sozo execute 0x1a2d94c3e453d9491121487e13414b105790f6f16e4da38bbe16d2163d7dcfd mint_ --calldata 0x517ececd29116499f4a1b64b094da79ba08dfd54a3edaa316134c41f8160973,10000,0
+````
 
 8. **Spawn ok**
 
 ```bash
-sozo execute 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097 spawn
+sozo execute 0x4d8676f82bef652080f09e6734f2018c8fd024493fc134424dcaf7ebf0be0e spawn
 ```
 
 ```bash
-sozo execute 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108 approve --calldata 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097,100,0
+sozo execute 0x1a2d94c3e453d9491121487e13414b105790f6f16e4da38bbe16d2163d7dcfd approve --calldata 0x4d8676f82bef652080f09e6734f2018c8fd024493fc134424dcaf7ebf0be0e,100,0
 ```
 
 ```bash
-sozo execute 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097 move --calldata 1,2,20,30,2,2,3
-Transaction: 0x40bf516fb3adca97ea71b6a5cbef14a88ef4b77bb208b15d25e1236712f08bb
+sozo execute 0x4d8676f82bef652080f09e6734f2018c8fd024493fc134424dcaf7ebf0be0e move --calldata 1,2,20,30,2,2,3
 ```
 
 Optional 9. **Auth**
