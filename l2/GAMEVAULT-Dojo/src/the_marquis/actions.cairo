@@ -1,5 +1,5 @@
 use starknet::ContractAddress;
-use l2_v4_0::the_marquis::models::{Choice};
+use l2::the_marquis::models::{Choice};
 use array::{ArrayTrait, SpanTrait};
 
 // define the interface
@@ -18,8 +18,8 @@ mod actions {
     use serde::Serde;
     use starknet::SyscallResultTrait;
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
-    use l2_v4_0::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
-    use l2_v4_0::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
+    use l2::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
+    use l2::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
     use super::IActions;
 
     // declaring custom event struct
@@ -27,8 +27,7 @@ mod actions {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Moved: Moved,
-        GameInitialized: GameInitialized,
-        PlayerMoved: PlayerMoved
+        GameInitialized: GameInitialized
     }
 
     // declaring custom event struct
@@ -44,17 +43,6 @@ mod actions {
     struct GameInitialized {
         #[key]
         game_id: u32
-    }
-
-    // declaring custom event struct
-    #[derive(Drop, starknet::Event)]
-    struct PlayerMoved {
-        #[key]
-        player_address: ContractAddress, 
-        #[key]
-        choice: Choice, 
-        #[key]
-        amount: u32
     }
 
     // impl: implement functions specified in trait
@@ -89,12 +77,12 @@ mod actions {
             // there are 48 choices at most
             assert(choices.len() > 0 && choices.len() <= 48 && choices.len() == amounts.len(), 'arrays length not match');
             let mut index = 0;
-            let mut aggregated_amount:u32 = 0;
+            let mut aggregated_amount = 0;
             loop {
                 if index == choices.len() {
                     break;
                 }
-                let amount:u32 = (*amounts[index]).try_into().unwrap();
+                let amount = (*amounts[index]).try_into().unwrap();
                 self.move_internal(game_id, player_address, (*choices[index]).try_into().unwrap(), amount);
                 aggregated_amount = aggregated_amount + amount;
                 index = index + 1;
@@ -174,8 +162,6 @@ mod actions {
             // update move count
             curr_game.move_count = move_id;
             set!(world, (curr_game, new_move));
-            emit!(world, PlayerMoved { player_address, choice, amount});
-
         }
 
         fn _only_owner(self: @ContractState) {

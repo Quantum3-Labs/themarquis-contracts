@@ -1,14 +1,15 @@
 [package]
-cairo-version = "2.4.0"
-name = "l2_v4_0"
-version = "0.5.1"
+name = "l2"
+version = "0.3.10"
+cairo-version = "2.3.1"
 version-The-marquis = "0.0.1"
+
 
 [cairo]
 sierra-replace-ids = true
 
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", version = "0.5.1" }
+dojo = { git = "https://github.com/dojoengine/dojo" }
 #starknet = ">=2.2.0"
 
 [[target.dojo]]
@@ -18,10 +19,5 @@ build-external-contracts = ["dojo_erc::erc20_contract::*"]
 initializer_class_hash = "0xbeef"
 
 [tool.dojo.env]
-rpc_url = "http://0.0.0.0:5050"
-account_address = "0x6162896d1d7ab204c7ccac6dd5f8e9e7c25ecd5ae4fcb4ad32e57786bb46e03"
+account_address = "0x517ececd29116499f4a1b64b094da79ba08dfd54a3edaa316134c41f8160973"
 private_key = "0x1800000000300000180000000000030000000000003006001800006600"
-
-# rpc_url = "https://starknet-goerli.infura.io/v3/c45bd0ce3e584ba4a5e6a5928c9c0b0f"
-# account_address = "0x03cff41d65a796886f6496684c7130dc661b42f2ef049adec6c397a8e4b99fa6"
-# private_key = "0x05adb3f31ba50d873dc6c93585d7e392b0b872860cefe69943ca6f7afce0a319"
