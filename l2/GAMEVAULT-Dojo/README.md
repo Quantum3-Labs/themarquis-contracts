@@ -1,6 +1,12 @@
 This the repo used on Istambul HH
 
-## Deploying on goerli
+Make sure to downgrade your dojo version to v0.3.10
+
+```bash
+dojoup -v 0.3.10
+```
+
+## Deploying on goerli (Todo)
 
 1. use your argent wallet address and private key
 2. use the following command
