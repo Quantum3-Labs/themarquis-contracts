@@ -20,8 +20,8 @@ initializer_class_hash = "0xbeef"
 
 [tool.dojo.env]
 # rpc_url = "https://starknet-goerli.infura.io/v3/c45bd0ce3e584ba4a5e6a5928c9c0b0f"
-# account_address = "0x517ececd29116499f4a1b64b094da79ba08dfd54a3edaa316134c41f8160973"
-# private_key = "0x1800000000300000180000000000030000000000003006001800006600"
+account_address = "0xb3ff441a68610b30fd5e2abbf3a1548eb6ba6f3559f2862bf2dc757e5828ca"
+private_key = "0x2bbf4f9fd0bbb2e60b0316c1fe0b76cf7a4d0198bd493ced9b8df2a3a24d68a"
 
 account_address = "0x03cff41d65a796886f6496684c7130dc661b42f2ef049adec6c397a8e4b99fa6"
 private_key = "0x05adb3f31ba50d873dc6c93585d7e392b0b872860cefe69943ca6f7afce0a319"
