@@ -7,7 +7,7 @@ curl -L https://install.dojoengine.org | bash
 Followed by:
 
 ```console
-dojoup
+dojoup -v 0.5.1
 ```
 
 For an in-depth setup guide, consult the [Dojo book](https://book.dojoengine.org/getting-started/quick-start.html).
@@ -25,48 +25,47 @@ katana --disable-fee
 2. **Terminal 2 - Contracts**:
 
 ```console
-cd /TheMarquis-contracts/l2/GAMEVAULT-Dojo && sozo build && sozo migrate
+cd l2/GAMEVAULT-Dojo && sozo build && sozo migrate
 ```
 
 4. **Terminal 4 - Torii**:
 
-Uncomment the 'world_address' parameter in `dojo-starter/Scarb.toml` then:
+In `dojo-starter/Scarb.toml` then:
 
 ```console
-cd /TheMarquis-contracts/l2/GAMEVAULT-Dojo && torii --world 0x6e31e6291f572cf76e11f1c99af8284f0d160f9f3af74e7e787a0f598bf0480
+cd l2/GAMEVAULT-Dojo && torii --world 0x262f386d92db8016458f779c46f5f56b837734e111bde17e5836890d5acfe25
 ```
 
 5. **initialize erc_20**
 
 ```bash
-sozo execute 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108 initialize --calldata 123,123,0x6e31e6291f572cf76e11f1c99af8284f0d160f9f3af74e7e787a0f598bf0480
+sozo execute 0x6339055f1c6d0e3c09ae7b4edcc3b0baa300e08203b7f99f93da819a59ed085 initialize --calldata 123,123,0x262f386d92db8016458f779c46f5f56b837734e111bde17e5836890d5acfe25
 ```
 
 6. **initialize actions**
 
-```bash
-sozo execute 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097 initialize --calldata 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108
+````bash
+sozo execute 0x306aee16fcbec0d4490a348fd15f3150c63992533230f6b7d638bb2b9cf5e3c initialize --calldata 0x6339055f1c6d0e3c09ae7b4edcc3b0baa300e08203b7f99f93da819a59ed085
 ```
 
 7. **mint m_usd**
 
 ```bash
-sozo execute 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108 mint_ --calldata 0x517ececd29116499f4a1b64b094da79ba08dfd54a3edaa316134c41f8160973,10000,0
-```
+sozo execute 0x6339055f1c6d0e3c09ae7b4edcc3b0baa300e08203b7f99f93da819a59ed085 mint_ --calldata 0x6162896d1d7ab204c7ccac6dd5f8e9e7c25ecd5ae4fcb4ad32e57786bb46e03,10000,0
+````
 
 8. **Spawn ok**
 
 ```bash
-sozo execute 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097 spawn
+sozo execute 0x306aee16fcbec0d4490a348fd15f3150c63992533230f6b7d638bb2b9cf5e3c spawn
 ```
 
 ```bash
-sozo execute 0x59bbd83d1178b7d10f7ffec372d4593283e9b5aa6075349834162deecfe5108 approve --calldata 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097,100,0
+sozo execute 0x6339055f1c6d0e3c09ae7b4edcc3b0baa300e08203b7f99f93da819a59ed085 approve --calldata 0x306aee16fcbec0d4490a348fd15f3150c63992533230f6b7d638bb2b9cf5e3c,100,0
 ```
 
 ```bash
-sozo execute 0x6ba9e3effb660a56ae35dc1b8304be20c8bbf262997dc82d4c9052add1da097 move --calldata 1,2,20,30,2,2,3
-Transaction: 0x40bf516fb3adca97ea71b6a5cbef14a88ef4b77bb208b15d25e1236712f08bb
+sozo execute 0x306aee16fcbec0d4490a348fd15f3150c63992533230f6b7d638bb2b9cf5e3c move --calldata 1,2,20,30,2,2,3
 ```
 
 Optional 9. **Auth**
