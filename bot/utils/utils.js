@@ -36,26 +36,27 @@ const executeTransaction = async (
     thisAccount = customAccount;
   }
   const nonce = await thisAccount?.getNonce();
+
   // execute a function
   const tx = await thisAccount.execute(
-    {
+    [{
       contractAddress: toAddress,
       entrypoint: functionName,
       calldata: calldata,
-    },
+    }],
     undefined,
     {
       maxFee: 0,
       nonce,
     }
   );
+
   const receipt = await thisAccount.waitForTransaction(tx.transaction_hash, {
     retryInterval: 100,
   });
   if (receipt.execution_status !== "SUCCEEDED") {
     throw new Error(customError);
   }
-  console.log(receipt);
   return receipt;
 };
 
