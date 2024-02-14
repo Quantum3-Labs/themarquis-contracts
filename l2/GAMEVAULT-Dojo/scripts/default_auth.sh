@@ -18,11 +18,13 @@ COMPONENTS_ERC_SYSTEMS=("ERC20Allowance" "ERC20Meta" "ERC20Balance")
 COMPONENTS=("Game" "Move" "WorldHelperStorage")
 
 for component in ${COMPONENTS[@]}; do
-    sozo auth writer $component $ACTIONS_ADDRESS --world $WORLD_ADDRESS --rpc-url $RPC_URL 
+    sozo auth writer $component $ACTIONS_ADDRESS --world $WORLD_ADDRESS --rpc-url $RPC_URL
+    sleep 2 
 done
 
 for component in ${COMPONENTS_ERC_SYSTEMS[@]}; do
     sozo auth writer $component $ERC_SYSTEMS_ADDRESS --world $WORLD_ADDRESS --rpc-url $RPC_URL
+    sleep 2
 done
 
 echo "Default authorizations have been successfully set."
