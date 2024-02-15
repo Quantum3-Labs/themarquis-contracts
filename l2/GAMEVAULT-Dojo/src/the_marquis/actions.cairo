@@ -1,15 +1,15 @@
 use starknet::ContractAddress;
-use l2_v4_0::the_marquis::models::{Choice};
+use l2_v4_2::the_marquis::models::{Choice};
 use array::{ArrayTrait, SpanTrait};
 
 // define the interface
 #[starknet::interface]
 trait IActions<TContractState> {
-    fn spawn(self: @TContractState) -> u32;
-    fn move(self: @TContractState, game_id: u32, choices: Span<Choice>, amounts: Span<u32>);
-    fn set_winner(self: @TContractState, game_id: u32, winning_number: u8);
+    fn spawn(ref self: TContractState) -> u32;
+    fn move(ref self: TContractState, game_id: u32, choices: Span<Choice>, amounts: Span<u32>);
+    fn set_winner(ref self: TContractState, game_id: u32, winning_number: u8);
     fn owner(self: @TContractState) -> ContractAddress;
-    fn initialize(self: @TContractState, usd_m_address: ContractAddress);
+    fn initialize(ref self: TContractState, usd_m_address: ContractAddress);
 }
 
 // dojo decorator
@@ -18,8 +18,8 @@ mod actions {
     use serde::Serde;
     use starknet::SyscallResultTrait;
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
-    use l2_v4_0::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
-    use l2_v4_0::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
+    use l2_v4_2::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
+    use l2_v4_2::the_marquis::utils::{seed, random, is_winning_move,get_multiplier, make_move, MAX_AMOUNT_MOVES};
     use super::IActions;
 
     // declaring custom event struct
@@ -61,7 +61,7 @@ mod actions {
     #[external(v0)]
     impl ActionsImpl of IActions<ContractState> {
         // ContractState is defined by system decorator expansion
-        fn spawn(self: @ContractState) -> u32{
+        fn spawn(ref self: ContractState) -> u32{
 
             // only owner can call this
             self._only_owner();
@@ -83,7 +83,7 @@ mod actions {
         }
 
         // Implementation of the move function for the ContractState struct.
-        fn move(self: @ContractState, game_id: u32, choices: Span<Choice>, amounts: Span<u32>) {
+        fn move(ref self: ContractState, game_id: u32, choices: Span<Choice>, amounts: Span<u32>) {
             
             let player_address = get_caller_address();
             // there are 48 choices at most
@@ -109,7 +109,7 @@ mod actions {
             self._owner()
         }
 
-        fn set_winner(self: @ContractState, game_id: u32, winning_number: u8) {
+        fn set_winner(ref self: ContractState, game_id: u32, winning_number: u8) {
 
             // only owner can call this
             self._only_owner();
@@ -122,7 +122,7 @@ mod actions {
 
             let mut curr_move_counter = 0;
             let mut aggregate_amount = 0;
-            // iterate over moves
+            // // iterate over moves
             loop {
                 if curr_move_counter > move_count {
                     break;
@@ -146,7 +146,7 @@ mod actions {
             set!(world, (curr_game));
         }
 
-        fn initialize(self: @ContractState, usd_m_address: ContractAddress) {
+        fn initialize(ref self: ContractState, usd_m_address: ContractAddress) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
             let mut helper_storage = get!(world, (get_contract_address()), WorldHelperStorage);
@@ -158,7 +158,7 @@ mod actions {
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-        fn move_internal(self: @ContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) {
+        fn move_internal(ref self: ContractState, game_id: u32, player_address: ContractAddress, choice: Choice, amount: u32) {
             // Access the world dispatcher for reading.
             let world = self.world_dispatcher.read();
 
@@ -193,7 +193,7 @@ mod actions {
             let helper_storage = get!(world, (get_contract_address()), WorldHelperStorage);
             helper_storage.usd_m_address
         }
-        fn _transfer_from(self: @ContractState, _from: ContractAddress, _to: ContractAddress, _amount: u32) -> bool{
+        fn _transfer_from(ref self: ContractState, _from: ContractAddress, _to: ContractAddress, _amount: u32) -> bool{
             let mut call_data: Array<felt252> = ArrayTrait::new();
             Serde::serialize(@_from, ref call_data);
             Serde::serialize(@_to, ref call_data);
@@ -205,7 +205,7 @@ mod actions {
                 .unwrap_syscall();
             Serde::<bool>::deserialize(ref res).unwrap()
         }
-        fn _transfer(self: @ContractState, _to: ContractAddress, _amount: u32) -> bool{
+        fn _transfer(ref self: ContractState, _to: ContractAddress, _amount: u32) -> bool{
             let mut call_data: Array<felt252> = ArrayTrait::new();
             Serde::serialize(@_to, ref call_data);
             Serde::serialize(@_amount, ref call_data);

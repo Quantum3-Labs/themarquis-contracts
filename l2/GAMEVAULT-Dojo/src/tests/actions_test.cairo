@@ -15,16 +15,16 @@ mod actions_test {
     use dojo::test_utils::{spawn_test_world, deploy_contract};
 
     // import models
-    use l2_v4_0::the_marquis::models::{game, move, world_helper_storage};
-    use l2_v4_0::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
-    use l2_v4_0::erc20_dojo::erc20_models::{erc_20_balance, erc_20_allowance, erc_20_meta};
-    use l2_v4_0::erc20_dojo::erc20_models::{ERC20Balance, ERC20Allowance, ERC20Meta};
+    use l2_v4_2::the_marquis::models::{game, move, world_helper_storage};
+    use l2_v4_2::the_marquis::models::{Game, Choice, Move, WorldHelperStorage};
+    use l2_v4_2::erc20_dojo::erc20_models::{erc_20_balance, erc_20_allowance, erc_20_meta};
+    use l2_v4_2::erc20_dojo::erc20_models::{ERC20Balance, ERC20Allowance, ERC20Meta};
 
     // import actions
-    use l2_v4_0::the_marquis::actions::{actions, IActionsDispatcher, IActionsDispatcherTrait};
-    use l2_v4_0::erc20_dojo::erc20::{erc_systems, IERC20Dispatcher, IERC20DispatcherTrait};
+    use l2_v4_2::the_marquis::actions::{actions, IActionsDispatcher, IActionsDispatcherTrait};
+    use l2_v4_2::erc20_dojo::erc20::{erc_systems, IERC20Dispatcher, IERC20DispatcherTrait};
 
-    use l2_v4_0::the_marquis::utils::{seed, random};
+    use l2_v4_2::the_marquis::utils::{seed, random};
 
     // reusable function for tests
     fn setup_world() -> (IWorldDispatcher, IActionsDispatcher, IERC20Dispatcher) {
