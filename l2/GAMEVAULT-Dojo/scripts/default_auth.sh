@@ -4,8 +4,8 @@ pushd $(dirname "$0")/..
 
 export RPC_URL="http://localhost:5050";
 export WORLD_ADDRESS=$(cat ./target/dev/manifest.json | jq -r '.world.address')
-export ACTIONS_ADDRESS=$(cat ./target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v4_0::the_marquis::actions::actions" ).address')
-export ERC_SYSTEMS_ADDRESS=$(cat ./target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v4_0::erc20_dojo::erc20::erc_systems" ).address')
+export ACTIONS_ADDRESS=$(cat ./target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v4_2::the_marquis::actions::actions" ).address')
+export ERC_SYSTEMS_ADDRESS=$(cat ./target/dev/manifest.json | jq -r '.contracts[] | select(.name == "l2_v4_2::erc20_dojo::erc20::erc_systems" ).address')
 
 echo "---------------------------------------------------------------------------"
 echo world : $WORLD_ADDRESS
